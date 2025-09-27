@@ -6,8 +6,43 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { UserButton } from "@/components/auth/UserButton"
+import dynamic from 'next/dynamic'
+import { ClerkProvider } from "@clerk/nextjs"
+import { SessionProvider } from "next-auth/react"
 
-export default function Home() {
+// Conditional Auth provider for development
+function AuthProvider({ children }: { children: React.ReactNode }) {
+  const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+
+  // Use Clerk only if we have a valid production publishable key
+  const isValidClerkKey = publishableKey &&
+    publishableKey.startsWith('pk_live_') &&
+    publishableKey.length > 20;
+
+  if (isValidClerkKey) {
+    return (
+      <ClerkProvider publishableKey={publishableKey}>
+        {children}
+      </ClerkProvider>
+    );
+  }
+
+  // Fallback to NextAuth.js for development and self-hosting
+  return (
+    <SessionProvider>
+      {children}
+    </SessionProvider>
+  );
+}
+
+// Dynamically import Clerk components to avoid SSR issues
+const AuthComponents = dynamic(() => import('@/components/auth/AuthDemo'), {
+  ssr: false,
+  loading: () => <div className="text-muted-foreground">Authentication wird geladen...</div>
+})
+
+function HomeContent() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
 
@@ -58,6 +93,7 @@ export default function Home() {
                   ))}
                 </SelectContent>
               </Select>
+              <UserButton />
             </div>
           </div>
         </div>
@@ -159,6 +195,12 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Authentication Components */}
+        <section className="mb-12">
+          <h2 className="text-2xl font-bold mb-6">Authentication Components</h2>
+          <AuthComponents />
+        </section>
+
         {/* Responsive Design Demo */}
         <section className="mb-12">
           <h2 className="text-2xl font-bold mb-6">Responsive Design</h2>
@@ -198,5 +240,13 @@ export default function Home() {
         </div>
       </footer>
     </div>
+  )
+}
+
+export default function Home() {
+  return (
+    <AuthProvider>
+      <HomeContent />
+    </AuthProvider>
   )
 }

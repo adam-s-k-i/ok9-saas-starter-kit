@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 import Home from './page'
 
 // Mock the dynamic import to avoid SSR issues
-jest.mock('@/components/auth/AuthDemo', () => ({
+vi.mock('@/components/auth/AuthDemo', () => ({
   __esModule: true,
   default: () => <div data-testid="auth-demo">Authentication Demo</div>,
 }))
@@ -42,14 +42,15 @@ describe('Home Page', () => {
 
   test('renders various button variants', () => {
     render(<Home />)
-    expect(screen.getByRole('button', { name: /primary button/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /secondary button/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /outline button/i })).toBeInTheDocument()
+    expect(screen.getAllByRole('button', { name: /primary/i }).length).toBeGreaterThan(0)
+    expect(screen.getByRole('button', { name: /secondary/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /outline/i })).toBeInTheDocument()
   })
 
   test('renders form elements', () => {
     render(<Home />)
-    expect(screen.getByLabelText(/email/i)).toBeInTheDocument()
+    const emailInputs = screen.getAllByLabelText(/email/i)
+    expect(emailInputs.length).toBeGreaterThan(0)
     expect(screen.getByLabelText(/passwort/i)).toBeInTheDocument()
     // Use getAllByRole and check for at least one button with this name
     const loginButtons = screen.getAllByRole('button', { name: /anmelden/i })
@@ -71,9 +72,9 @@ describe('Home Page', () => {
     expect(searchInput).toHaveValue('button')
   })
 
-  test('renders footer content', () => {
+  test('renders footer content', async () => {
     render(<Home />)
-    expect(screen.getByText(/dokumentation/i)).toBeInTheDocument()
+    expect(await screen.findByText(/dokumentation/i)).toBeInTheDocument()
     expect(screen.getByText(/github/i)).toBeInTheDocument()
   })
 

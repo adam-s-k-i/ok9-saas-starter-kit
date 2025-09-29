@@ -1,29 +1,67 @@
 # OK9 SaaS Starter Kit - Claude Code Configuration
 
-## Projektübersicht
+> **Version:** 1.2.0
+> **Letzte Aktualisierung:** 2024-09-29
+> **Status:** Production Ready
+
+## 📋 Projektübersicht
 
 Das OK9 SaaS Starter Kit ist ein modulares Next.js-basiertes Starter-Kit für die schnelle Entwicklung von SaaS-Anwendungen. Diese Konfiguration definiert spezialisierte Claude Code Subagenten zur Unterstützung der Entwicklung.
 
+### 🔗 Verwandte Dokumentation
+- [Product Requirements Document](./OK9-SaaS-Starter-Kit-PRD.md)
+- [Testing Setup](./TESTING.md)
+- [Frontend Components](./src/components/README.md)
+
 ## Subagenten-Architektur
 
-### Architecture Agent (Hauptagent)
-**Verantwortlich für**: Gesamtsteuerung, Modul-Integration, Code-Review
+Diese Konfiguration nutzt die Claude Code eigenen Subagenten-Features für spezialisierte Entwicklungstasks mit einer neuen PO-Agent zentrierten Kommunikationsstruktur.
+
+### PO Agent (Product Owner - Kommunikationszentrale)
+**Verantwortlich für**: User-Kommunikation, Anforderungsanalyse, Task-Koordination
 
 ```yaml
-role: architecture-agent
-description: "Hauptagent für Architektur-Entscheidungen und Modul-Integration"
+subagent_type: general-purpose
+role: product-owner-agent
+description: "Zentraler Kommunikations-Agent zwischen User und Entwicklungsteam"
 capabilities:
+  - user-communication
+  - requirements-analysis
+  - task-coordination
+  - priority-management
+  - stakeholder-management
+  - project-overview
+communication_flow:
+  - direct-user-interface: true
+  - architecture-agent-delegation: true
+  - no-direct-tools: true
+```
+
+### Architecture Agent (Koordinations-Agent)
+**Verantwortlich für**: Technische Architektur, Modul-Integration, Task-Delegation an Fachagenten
+
+```yaml
+subagent_type: general-purpose
+role: architecture-agent
+description: "Technischer Koordinations-Agent für Architektur-Entscheidungen"
+capabilities:
+  - technical-architecture
   - module-integration
+  - specialist-agent-delegation
   - code-review
   - dependency-management
   - performance-optimization
   - security-audit
+communication_flow:
+  - receives-from: product-owner-agent
+  - delegates-to: [frontend-agent, backend-agent, devops-agent, testing-agent, documentation-agent]
 ```
 
-### Frontend Agent
+### Frontend Agent (Spezialist)
 **Verantwortlich für**: React/Next.js Entwicklung, UI/UX, Component Library
 
 ```yaml
+subagent_type: general-purpose
 role: frontend-agent
 description: "Spezialisiert auf Frontend-Entwicklung mit React, Next.js und shadcn/ui"
 capabilities:
@@ -32,12 +70,19 @@ capabilities:
   - component-creation
   - tailwind-styling
   - performance-monitoring
+  - responsive-design
+  - accessibility
+communication_flow:
+  - receives-from: architecture-agent
+  - reports-to: architecture-agent
+  - collaboration: [testing-agent, documentation-agent]
 ```
 
-### Backend Agent
+### Backend Agent (Spezialist)
 **Verantwortlich für**: API-Entwicklung, Database, Authentication
 
 ```yaml
+subagent_type: general-purpose
 role: backend-agent
 description: "Spezialisiert auf Backend-Entwicklung mit Prisma, PostgreSQL und API-Routes"
 capabilities:
@@ -46,12 +91,19 @@ capabilities:
   - authentication-integration
   - webhook-handling
   - data-validation
+  - security-implementation
+  - performance-optimization
+communication_flow:
+  - receives-from: architecture-agent
+  - reports-to: architecture-agent
+  - collaboration: [testing-agent, devops-agent]
 ```
 
-### DevOps Agent
+### DevOps Agent (Spezialist)
 **Verantwortlich für**: Deployment, CI/CD, Infrastructure
 
 ```yaml
+subagent_type: general-purpose
 role: devops-agent
 description: "Spezialisiert auf Deployment, CI/CD und Infrastructure Management"
 capabilities:
@@ -60,12 +112,19 @@ capabilities:
   - environment-management
   - monitoring-setup
   - security-hardening
+  - docker-configuration
+  - performance-monitoring
+communication_flow:
+  - receives-from: architecture-agent
+  - reports-to: architecture-agent
+  - collaboration: [backend-agent, testing-agent]
 ```
 
-### Testing Agent
+### Testing Agent (Spezialist)
 **Verantwortlich für**: Test-Strategie, Quality Assurance
 
 ```yaml
+subagent_type: general-purpose
 role: testing-agent
 description: "Spezialisiert auf Testing-Strategien und Quality Assurance"
 capabilities:
@@ -74,19 +133,105 @@ capabilities:
   - integration-testing
   - e2e-testing
   - performance-testing
+  - test-coverage-analysis
+  - quality-metrics
+communication_flow:
+  - receives-from: architecture-agent
+  - reports-to: architecture-agent
+  - collaboration: [all-agents]
 ```
 
-## Agenten-Kommunikation
+### Documentation Agent (Spezialist)
+**Verantwortlich für**: Dokumentation, Code-Dokumentation, READMEs
 
-### Workflow Pattern
+```yaml
+subagent_type: general-purpose
+role: documentation-agent
+description: "Spezialisiert auf Dokumentation und Code-Dokumentation"
+capabilities:
+  - technical-documentation
+  - api-documentation
+  - code-comments
+  - readme-generation
+  - user-guides
+  - troubleshooting-guides
+communication_flow:
+  - receives-from: architecture-agent
+  - reports-to: architecture-agent
+  - collaboration: [all-agents]
 ```
-User Request → Architecture Agent → Specialized Agent → Architecture Agent → Response
+
+## 🔄 Agenten-Kommunikation
+
+### Neue Workflow Pattern
+```
+User Request → PO Agent → Architecture Agent → Specialized Agent → Architecture Agent → PO Agent → Response
+```
+
+### Kommunikationshierarchie
+```
+┌─────────────────┐
+│    User/Client  │
+└─────────┬───────┘
+          │
+          ▼
+┌─────────────────┐  (einziger User-Kontakt)
+│    PO Agent     │
+└─────────┬───────┘
+          │
+          ▼
+┌─────────────────┐  (technische Koordination)
+│Architecture Agnt│
+└─────────┬───────┘
+          │
+          ▼
+┌─────────────────────────────────────────┐
+│  Specialized Agents (Parallelarbeitung) │
+│  ┌─────────┐ ┌─────────┐ ┌─────────┐    │
+│  │Frontend │ │Backend  │ │DevOps   │    │
+│  └─────────┘ └─────────┘ └─────────┘    │
+│  ┌─────────┐ ┌─────────┐               │
+│  │Testing  │ │  Docs   │               │
+│  └─────────┘ └─────────┘               │
+└─────────────────────────────────────────┘
 ```
 
 ### Kommunikationsprotokolle
-1. **Task Delegation**: Architecture Agent delegiert spezifische Tasks an spezialisierte Agents
-2. **Result Aggregation**: Specialized Agents liefern Ergebnisse zurück an Architecture Agent
-3. **Quality Control**: Architecture Agent führt finalen Code-Review durch
+1. **User Interface**: PO Agent ist einziger direkter User-Kontakt
+2. **Requirements Analysis**: PO Agent analysiert und strukturiert User Requests
+3. **Technical Delegation**: PO Agent delegiert an Architecture Agent
+4. **Task Distribution**: Architecture Agent delegiert an Fachagenten
+5. **Result Aggregation**: Architecture Agent sammelt und integriert Ergebnisse
+6. **Quality Control**: Architecture Agent führt finalen Review durch
+7. **User Communication**: PO Agent übersetzt technische Ergebnisse für User
+
+### Task Delegation mit neuer PO-Agent Struktur
+```bash
+# Neue Agenten-Hierarchie
+product-owner-agent: User-Interface, Requirements-Analyse (keine Tools)
+architecture-agent: Technische Koordination, Task-Verteilung
+frontend-agent: UI/UX, React, Next.js, CSS
+backend-agent: API, Database, Authentication, Security
+devops-agent: Deployment, CI/CD, Infrastructure
+testing-agent: Tests, Quality Assurance, Performance
+documentation-agent: Dokumentation, READMEs, Guides
+
+# Beispiel für neue Task-Delegation-Kette
+# 1. PO Agent erhält User Request
+# 2. PO Agent analysiert und strukturiert Request
+Task(
+  description="Koordiniere Dashboard-Implementierung",
+  prompt="User möchte Dashboard-Komponente. Analysiere technische Anforderungen und delegiere an entsprechende Fachagenten.",
+  subagent_type="general-purpose"  # Architecture Agent
+)
+
+# 3. Architecture Agent delegiert an Fachagenten
+Task(
+  description="Implementiere Dashboard-Komponente",
+  prompt="Erstelle React Dashboard-Komponente basierend auf Architecture Agent Spezifikation",
+  subagent_type="general-purpose"  # Frontend Agent
+)
+```
 
 ## Module-spezifische Konfigurationen
 
@@ -150,32 +295,46 @@ config:
   - performance-optimization
 ```
 
-## Entwicklungsworkflows
+## 🔧 Entwicklungsworkflows
 
-### Neue Feature-Entwicklung
+### Neue Feature-Entwicklung mit PO-Agent
 ```bash
-# 1. Architecture Agent analysiert Anforderung
-# 2. Delegiert an entsprechende spezialisierte Agents
-# 3. Agents implementieren ihre Teile
-# 4. Architecture Agent führt Integration durch
-# 5. Testing Agent validiert Implementation
+# 1. User stellt Anfrage an PO Agent
+# 2. PO Agent analysiert User-Anforderungen und Business-Logik
+# 3. PO Agent delegiert technische Analyse an Architecture Agent
+# 4. Architecture Agent erstellt technische Spezifikation
+# 5. Architecture Agent delegiert an entsprechende Fachagenten (parallel)
+# 6. Fachagenten implementieren ihre Bereiche
+# 7. Architecture Agent koordiniert Integration
+# 8. Testing Agent validiert Gesamtimplementierung
+# 9. Architecture Agent meldet Ergebnis an PO Agent
+# 10. PO Agent kommuniziert Ergebnis an User
 ```
 
-### Code-Review Prozess
+### Code-Review Prozess mit PO-Agent
 ```bash
-# 1. Architecture Agent prüft Gesamtarchitektur
-# 2. Specialized Agents prüfen fachspezifische Aspekte
-# 3. Testing Agent prüft Testabdeckung
-# 4. DevOps Agent prüft Deployment-Readiness
+# 1. User Request über PO Agent
+# 2. PO Agent strukturiert Review-Anforderungen
+# 3. Architecture Agent koordiniert Review-Prozess
+# 4. Architecture Agent prüft Gesamtarchitektur
+# 5. Fachagenten prüfen ihre spezifischen Bereiche (parallel)
+# 6. Testing Agent prüft Testabdeckung und Qualität
+# 7. DevOps Agent prüft Deployment-Readiness
+# 8. Architecture Agent aggregiert Review-Ergebnisse
+# 9. PO Agent präsentiert Ergebnisse an User
 ```
 
-### Bug Fixing
+### Bug Fixing mit PO-Agent
 ```bash
-# 1. Architecture Agent identifiziert Problembereich
-# 2. Delegiert an zuständigen Specialized Agent
-# 3. Agent implementiert Fix
-# 4. Testing Agent validiert Fix
-# 5. Architecture Agent führt Regression-Test durch
+# 1. User meldet Bug an PO Agent
+# 2. PO Agent klassifiziert und priorisiert Bug
+# 3. PO Agent delegiert Bug-Analyse an Architecture Agent
+# 4. Architecture Agent identifiziert Problembereich
+# 5. Architecture Agent delegiert Fix an zuständigen Fachagenten
+# 6. Fachagent implementiert Fix
+# 7. Testing Agent validiert Fix und führt Regression-Tests durch
+# 8. Architecture Agent bestätigt Fix-Integration
+# 9. PO Agent kommuniziert Lösung an User
 ```
 
 ## Quality Gates
@@ -203,9 +362,11 @@ config:
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:coverage": "vitest --coverage",
+    "test:ui": "vitest --ui",
+    "type-check": "tsc --noEmit",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts"
@@ -265,20 +426,82 @@ npm run lint -- --fix
 npm run type-check
 ```
 
+## 🚀 Praktische Implementation der PO-Agent Struktur
+
+### User-Interaktion Protokoll
+```typescript
+// Beispiel: User möchte neue Komponente
+// 1. User kommuniziert nur mit PO Agent
+"Ich brauche eine neue Login-Komponente mit Social Login"
+
+// 2. PO Agent analysiert und strukturiert
+// - Business Requirements: Login-Funktionalität
+// - User Experience: Social Login Integration
+// - Priorität: Hoch (Authentication kritisch)
+
+// 3. PO Agent delegiert an Architecture Agent
+Task(
+  description="Analysiere Login-Komponente Anforderungen",
+  prompt="User braucht Login-Komponente mit Social Login. Erstelle technische Spezifikation und delegiere an Fachagenten.",
+  subagent_type="general-purpose"  // Architecture Agent
+)
+```
+
+### Architecture Agent Koordination
+```typescript
+// Architecture Agent erhält strukturierte Anfrage vom PO Agent
+// Analysiert technische Anforderungen und delegiert parallel:
+
+// Frontend Komponente
+Task(
+  description="Implementiere Login-UI-Komponente",
+  prompt="Erstelle Login-Formular mit Social Login Buttons (Google, GitHub) basierend auf shadcn/ui",
+  subagent_type="general-purpose"  // Frontend Agent
+)
+
+// Backend Integration
+Task(
+  description="Konfiguriere Social Login Backend",
+  prompt="Setup Clerk Social Login Provider für Google und GitHub",
+  subagent_type="general-purpose"  // Backend Agent
+)
+
+// Testing
+Task(
+  description="Erstelle Login-Tests",
+  prompt="Implementiere Unit und Integration Tests für Login-Funktionalität",
+  subagent_type="general-purpose"  // Testing Agent
+)
+```
+
+### Kommunikationsregeln
+1. **User ↔ PO Agent**: Einziger direkter Kontakt
+2. **PO Agent → Architecture Agent**: Strukturierte technische Delegation
+3. **Architecture Agent ↔ Fachagenten**: Parallele Task-Verteilung
+4. **Fachagenten → Architecture Agent**: Ergebnisse und Status-Updates
+5. **Architecture Agent → PO Agent**: Integrierte Ergebnisse
+6. **PO Agent → User**: User-freundliche Kommunikation
+
 ## Weiterentwicklung
 
-### Neue Module hinzufügen
-1. Architecture Agent definiert Modul-Spezifikation
-2. Corresponding Specialized Agent implementiert Modul
-3. Testing Agent erstellt Test-Suite
-4. DevOps Agent konfiguriert Deployment
-5. Documentation Agent erstellt Dokumentation
+### Neue Module hinzufügen mit PO-Agent
+1. User Request über PO Agent
+2. PO Agent analysiert Business-Requirements
+3. PO Agent delegiert an Architecture Agent
+4. Architecture Agent definiert technische Spezifikation
+5. Architecture Agent delegiert an entsprechende Fachagenten
+6. Testing Agent erstellt Test-Suite
+7. DevOps Agent konfiguriert Deployment
+8. Documentation Agent erstellt Dokumentation
+9. Architecture Agent integriert alle Komponenten
+10. PO Agent kommuniziert Fertigstellung an User
 
-### Agenten erweitern
-1. Neue Capabilities definieren
-2. Training Data vorbereiten
-3. Integrationstests durchführen
-4. Performance optimieren
+### Agenten-Hierarchie erweitern
+1. PO Agent identifiziert neue Anforderungen
+2. Architecture Agent evaluiert neue Agent-Rollen
+3. Neue Fachagenten-Capabilities definieren
+4. Integration in bestehende Kommunikationsstruktur
+5. Testing der neuen Agent-Interaktionen
 
 ## Support & Kontakt
 

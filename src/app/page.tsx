@@ -2,14 +2,32 @@
 
 import { useState } from 'react'
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+// DropdownMenu components temporarily disabled for debugging
+// import {
+//   DropdownMenu,
+//   DropdownMenuContent,
+//   DropdownMenuGroup,
+//   DropdownMenuItem,
+//   DropdownMenuLabel,
+//   DropdownMenuSeparator,
+//   DropdownMenuTrigger,
+//   DropdownMenuCheckboxItem,
+//   DropdownMenuRadioGroup,
+//   DropdownMenuRadioItem,
+//   DropdownMenuSub,
+//   DropdownMenuSubContent,
+//   DropdownMenuSubTrigger,
+// } from "@/components/ui/dropdown-menu"
 import { UserButton } from "@/components/auth/UserButton"
 import dynamic from 'next/dynamic'
 import { ClerkProvider } from "@clerk/nextjs"
 import { SessionProvider } from "next-auth/react"
+import { Settings, LogOut, Download } from 'lucide-react'
 
 // Conditional Auth provider for development
 function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -45,13 +63,23 @@ const AuthComponents = dynamic(() => import('@/components/auth/AuthDemo'), {
 function HomeContent() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
+  // DropdownMenu state temporarily disabled for debugging
+  // const [dropdownOpen, setDropdownOpen] = useState(false)
+  // const [checkboxItems, setCheckboxItems] = useState({
+  //   status: true,
+  //   comments: false,
+  //   notifications: true
+  // })
+  // const [radioValue, setRadioValue] = useState('default')
 
   const componentCategories = [
     { id: 'all', name: 'Alle Komponenten' },
     { id: 'buttons', name: 'Buttons' },
     { id: 'forms', name: 'Formulare' },
     { id: 'cards', name: 'Cards' },
-    { id: 'navigation', name: 'Navigation' }
+    { id: 'navigation', name: 'Navigation' },
+    { id: 'avatars', name: 'Avatare' },
+    { id: 'dropdowns', name: 'Dropdown-Menüs' }
   ]
 
   const tailwindUtilities = [
@@ -129,44 +157,112 @@ function HomeContent() {
         <section className="mb-12">
           <h2 className="text-2xl font-bold mb-6">shadcn/ui Components</h2>
 
-          {/* Buttons */}
-          <div className="mb-8">
-            <h3 className="text-xl font-semibold mb-4">Buttons</h3>
-            <div className="flex flex-wrap gap-4">
-              <Button variant="default">Primary Button</Button>
-              <Button variant="secondary">Secondary Button</Button>
-              <Button variant="outline">Outline Button</Button>
-              <Button variant="ghost">Ghost Button</Button>
-              <Button variant="link">Link Button</Button>
-              <Button variant="destructive">Destructive Button</Button>
+          {/* Buttons - Enhanced */}
+          <div className="mb-12">
+            <h3 className="text-xl font-semibold mb-6">Buttons</h3>
+
+            {/* Button Variants */}
+            <div className="mb-8">
+              <h4 className="text-lg font-medium mb-4">Varianten</h4>
+              <div className="flex flex-wrap gap-4">
+                <Button variant="default">Primary</Button>
+                <Button variant="secondary">Secondary</Button>
+                <Button variant="outline">Outline</Button>
+                <Button variant="ghost">Ghost</Button>
+                <Button variant="link">Link</Button>
+                <Button variant="destructive">Destructive</Button>
+              </div>
+            </div>
+
+            {/* Button Sizes */}
+            <div className="mb-8">
+              <h4 className="text-lg font-medium mb-4">Größen</h4>
+              <div className="flex flex-wrap items-center gap-4">
+                <Button size="sm">Small</Button>
+                <Button size="default">Default</Button>
+                <Button size="lg">Large</Button>
+                <Button size="icon">🔍</Button>
+              </div>
+            </div>
+
+            {/* Button States */}
+            <div>
+              <h4 className="text-lg font-medium mb-4">Zustände</h4>
+              <div className="flex flex-wrap gap-4">
+                <Button disabled>Disabled</Button>
+                <Button disabled className="opacity-50">Loading</Button>
+              </div>
             </div>
           </div>
 
-          {/* Forms */}
-          <div className="mb-8">
-            <h3 className="text-xl font-semibold mb-4">Form Elements</h3>
-            <Card className="max-w-md">
-              <CardHeader>
-                <CardTitle>Beispiel Formular</CardTitle>
-                <CardDescription>Formularelemente mit Label und Input</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" placeholder="email@beispiel.de" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">Passwort</Label>
-                  <Input id="password" type="password" placeholder="Passwort" />
-                </div>
-                <Button type="submit" className="w-full">Anmelden</Button>
-              </CardContent>
-            </Card>
+          {/* Forms - Enhanced */}
+          <div className="mb-12">
+            <h3 className="text-xl font-semibold mb-6">Form Elements</h3>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Basic Form */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Beispiel Formular</CardTitle>
+                  <CardDescription>Formularelemente mit Label und Input</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input id="email" type="email" placeholder="email@beispiel.de" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Passwort</Label>
+                    <Input id="password" type="password" placeholder="Passwort" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="select">Auswahl</Label>
+                    <Select>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Wählen Sie eine Option" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="option1">Option 1</SelectItem>
+                        <SelectItem value="option2">Option 2</SelectItem>
+                        <SelectItem value="option3">Option 3</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button type="submit" className="w-full">Anmelden</Button>
+                </CardContent>
+              </Card>
+
+              {/* Input Variants */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Input Varianten</CardTitle>
+                  <CardDescription>Verschiedene Input-Typen und Zustände</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="text">Text Input</Label>
+                    <Input id="text" placeholder="Einfacher Text" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="number">Number Input</Label>
+                    <Input id="number" type="number" placeholder="Zahl eingeben" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="disabled">Disabled Input</Label>
+                    <Input id="disabled" disabled placeholder="Deaktiviert" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="error">Error State</Label>
+                    <Input id="error" className="border-red-500" placeholder="Fehlerzustand" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
 
-          {/* Cards */}
-          <div className="mb-8">
-            <h3 className="text-xl font-semibold mb-4">Cards</h3>
+          {/* Cards - Enhanced */}
+          <div className="mb-12">
+            <h3 className="text-xl font-semibold mb-6">Cards</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <Card>
                 <CardHeader>
@@ -174,7 +270,7 @@ function HomeContent() {
                   <CardDescription>Eine einfache Card-Komponente</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p>Dies ist der Inhalt der Card.</p>
+                  <p>Dies ist der Inhalt der Card mit grundlegenden Informationen.</p>
                 </CardContent>
               </Card>
 
@@ -184,15 +280,587 @@ function HomeContent() {
                   <CardDescription>Card mit Buttons im Footer</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p>Card-Inhalt mit zusätzlichen Aktionen.</p>
+                  <p>Card-Inhalt mit zusätzlichen Aktionen im Footer-Bereich.</p>
                 </CardContent>
-                <div className="flex gap-2 p-6 pt-0">
+                <CardFooter className="flex gap-2">
                   <Button variant="outline" size="sm">Abbrechen</Button>
                   <Button size="sm">Speichern</Button>
-                </div>
+                </CardFooter>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Card mit Bild</CardTitle>
+                  <CardDescription>Visuell ansprechende Card</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="aspect-video bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg mb-4 flex items-center justify-center">
+                    <span className="text-white font-semibold">Bild Platzhalter</span>
+                  </div>
+                  <p>Card mit integriertem visuellen Element.</p>
+                </CardContent>
               </Card>
             </div>
           </div>
+
+          {/* Avatars */}
+          <div className="mb-12">
+            <h3 className="text-xl font-semibold mb-6">Avatare</h3>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Avatar Variants */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Avatar Varianten</CardTitle>
+                  <CardDescription>Verschiedene Avatar-Typen und Größen</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-6">
+                      <div className="flex flex-col items-center gap-2">
+                        <span className="text-sm text-muted-foreground">Small</span>
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src="/avatars/01.png" alt="@shadcn" />
+                          <AvatarFallback>CN</AvatarFallback>
+                        </Avatar>
+                      </div>
+                      <div className="flex flex-col items-center gap-2">
+                        <span className="text-sm text-muted-foreground">Default</span>
+                        <Avatar>
+                          <AvatarImage src="/avatars/02.png" alt="@shadcn" />
+                          <AvatarFallback>SN</AvatarFallback>
+                        </Avatar>
+                      </div>
+                      <div className="flex flex-col items-center gap-2">
+                        <span className="text-sm text-muted-foreground">Large</span>
+                        <Avatar className="h-16 w-16">
+                          <AvatarImage src="/avatars/03.png" alt="@shadcn" />
+                          <AvatarFallback>LN</AvatarFallback>
+                        </Avatar>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <h4 className="font-medium">Fallback States</h4>
+                      <div className="flex gap-4">
+                        <Avatar>
+                          <AvatarFallback className="bg-blue-100 text-blue-800">AB</AvatarFallback>
+                        </Avatar>
+                        <Avatar>
+                          <AvatarFallback className="bg-green-100 text-green-800">CD</AvatarFallback>
+                        </Avatar>
+                        <Avatar>
+                          <AvatarFallback className="bg-red-100 text-red-800">EF</AvatarFallback>
+                        </Avatar>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Avatar with Text */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Avatar in Context</CardTitle>
+                  <CardDescription>Avatare in typischen Anwendungsfällen</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {/* User Profile */}
+                    <div className="flex items-center gap-3 p-3 border rounded-lg">
+                      <Avatar>
+                        <AvatarImage src="/avatars/04.png" alt="@user" />
+                        <AvatarFallback>US</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium">Max Mustermann</p>
+                        <p className="text-sm text-muted-foreground">Software Engineer</p>
+                      </div>
+                    </div>
+
+                    {/* Team Members */}
+                    <div className="space-y-2">
+                      <h4 className="font-medium">Team Members</h4>
+                      <div className="flex -space-x-2">
+                        <Avatar className="border-2 border-background">
+                          <AvatarFallback className="bg-blue-100">MM</AvatarFallback>
+                        </Avatar>
+                        <Avatar className="border-2 border-background">
+                          <AvatarFallback className="bg-green-100">AS</AvatarFallback>
+                        </Avatar>
+                        <Avatar className="border-2 border-background">
+                          <AvatarFallback className="bg-yellow-100">JK</AvatarFallback>
+                        </Avatar>
+                        <Avatar className="border-2 border-background">
+                          <AvatarFallback className="bg-purple-100">+3</AvatarFallback>
+                        </Avatar>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          {/* Dropdown Menus - Temporarily disabled for debugging */}
+          {/* <div className="mb-12">
+            <h3 className="text-xl font-semibold mb-6">Dropdown-Menüs</h3>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Standard Dropdown</CardTitle>
+                  <CardDescription>Einfaches Dropdown-Menü mit verschiedenen Items</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline">Dropdown öffnen</Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56">
+                      <DropdownMenuLabel>Mein Konto</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuGroup>
+                        <DropdownMenuItem>
+                          <User className="mr-2 h-4 w-4" />
+                          <span>Profil</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>
+                          <Settings className="mr-2 h-4 w-4" />
+                          <span>Einstellungen</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>
+                          <Users className="mr-2 h-4 w-4" />
+                          <span>Team verwalten</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuGroup>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem>
+                        <LogOut className="mr-2 h-4 w-4" />
+                        <span>Abmelden</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Erweitertes Dropdown</CardTitle>
+                  <CardDescription>Mit Checkboxen, Radio-Buttons und Sub-Menüs</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline">Erweitertes Menü</Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56">
+                      <DropdownMenuLabel>Einstellungen</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+
+                      <DropdownMenuGroup>
+                        <DropdownMenuCheckboxItem
+                          checked={checkboxItems.status}
+                          onCheckedChange={(checked) => setCheckboxItems({...checkboxItems, status: !!checked})}
+                        >
+                          Online-Status
+                        </DropdownMenuCheckboxItem>
+                        <DropdownMenuCheckboxItem
+                          checked={checkboxItems.comments}
+                          onCheckedChange={(checked) => setCheckboxItems({...checkboxItems, comments: !!checked})}
+                        >
+                          Kommentare
+                        </DropdownMenuCheckboxItem>
+                        <DropdownMenuCheckboxItem
+                          checked={checkboxItems.notifications}
+                          onCheckedChange={(checked) => setCheckboxItems({...checkboxItems, notifications: !!checked})}
+                        >
+                          Benachrichtigungen
+                        </DropdownMenuCheckboxItem>
+                      </DropdownMenuGroup>
+
+                      <DropdownMenuSeparator />
+
+                      <DropdownMenuRadioGroup value={radioValue} onValueChange={setRadioValue}>
+                        <DropdownMenuLabel>Theme</DropdownMenuLabel>
+                        <DropdownMenuRadioItem value="light">Hell</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem value="dark">Dunkel</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem value="system">System</DropdownMenuRadioItem>
+                      </DropdownMenuRadioGroup>
+
+                      <DropdownMenuSeparator />
+
+                      <DropdownMenuSub>
+                        <DropdownMenuSubTrigger>
+                          <Settings className="mr-2 h-4 w-4" />
+                          <span>Weitere Optionen</span>
+                        </DropdownMenuSubTrigger>
+                        <DropdownMenuSubContent>
+                          <DropdownMenuItem>
+                            <Download className="mr-2 h-4 w-4" />
+                            <span>Import</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <Download className="mr-2 h-4 w-4" />
+                            <span>Export</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem>
+                            <HelpCircle className="mr-2 h-4 w-4" />
+                            <span>Hilfe</span>
+                          </DropdownMenuItem>
+                        </DropdownMenuSubContent>
+                      </DropdownMenuSub>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </CardContent>
+              </Card>
+            </div>
+          </div> */}
+
+          {/* Select Component */}
+          <div className="mb-12">
+            <h3 className="text-xl font-semibold mb-6">Select Komponente</h3>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Standard Select</CardTitle>
+                  <CardDescription>Einfache Auswahlkomponente</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="category">Kategorie</Label>
+                      <Select>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Kategorie wählen" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="design">Design</SelectItem>
+                          <SelectItem value="development">Entwicklung</SelectItem>
+                          <SelectItem value="marketing">Marketing</SelectItem>
+                          <SelectItem value="support">Support</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="status">Status</Label>
+                      <Select>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Status wählen" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="active">Aktiv</SelectItem>
+                          <SelectItem value="inactive">Inaktiv</SelectItem>
+                          <SelectItem value="pending">Ausstehend</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Select mit verschiedenen Größen</CardTitle>
+                  <CardDescription>Angepasste Select-Komponenten</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <Select>
+                      <SelectTrigger className="w-32">
+                        <SelectValue placeholder="Small" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="s">Small</SelectItem>
+                        <SelectItem value="m">Medium</SelectItem>
+                        <SelectItem value="l">Large</SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    <Select>
+                      <SelectTrigger className="w-48">
+                        <SelectValue placeholder="Medium Width" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="option1">Längere Option 1</SelectItem>
+                        <SelectItem value="option2">Längere Option 2</SelectItem>
+                        <SelectItem value="option3">Längere Option 3</SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    <Select>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Full Width" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="full1">Vollständige Breite Option 1</SelectItem>
+                        <SelectItem value="full2">Vollständige Breite Option 2</SelectItem>
+                        <SelectItem value="full3">Vollständige Breite Option 3</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        {/* Component Overview Grid */}
+        <section className="mb-12">
+          <h2 className="text-2xl font-bold mb-6">Komponenten-Übersicht</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Button Component */}
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                  Button
+                </CardTitle>
+                <CardDescription>Interaktive Schaltflächen mit verschiedenen Varianten</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2">
+                  <Button size="sm" variant="outline">Beispiel</Button>
+                  <Button size="sm">Primary</Button>
+                </div>
+                <p className="text-sm text-muted-foreground mt-2">6 Varianten, 4 Größen</p>
+              </CardContent>
+            </Card>
+
+            {/* Input Component */}
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                  Input
+                </CardTitle>
+                <CardDescription>Eingabefelder für Formulare und Daten</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Input placeholder="Beispiel Input" />
+                <p className="text-sm text-muted-foreground mt-2">Verschiedene Typen und Zustände</p>
+              </CardContent>
+            </Card>
+
+            {/* Card Component */}
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                  Card
+                </CardTitle>
+                <CardDescription>Container für zusammengehörige Inhalte</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="p-3 border rounded-lg bg-muted/50">
+                  <p className="text-sm">Card-Inhalt Beispiel</p>
+                </div>
+                <p className="text-sm text-muted-foreground mt-2">Header, Content, Footer</p>
+              </CardContent>
+            </Card>
+
+            {/* Avatar Component */}
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                  Avatar
+                </CardTitle>
+                <CardDescription>Benutzerbilder und Platzhalter</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex gap-3">
+                  <Avatar>
+                    <AvatarFallback>AB</AvatarFallback>
+                  </Avatar>
+                  <Avatar>
+                    <AvatarFallback>CD</AvatarFallback>
+                  </Avatar>
+                </div>
+                <p className="text-sm text-muted-foreground mt-2">Bilder, Fallbacks, Größen</p>
+              </CardContent>
+            </Card>
+
+            {/* Dropdown Menu Component - Temporarily disabled for debugging */}
+            {/* <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                  Dropdown Menu
+                </CardTitle>
+                <CardDescription>Kontextmenüs und Auswahloptionen</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm">Menü öffnen</Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem>Option 1</DropdownMenuItem>
+                    <DropdownMenuItem>Option 2</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <p className="text-sm text-muted-foreground mt-2">Checkboxen, Radio, Sub-Menüs</p>
+              </CardContent>
+            </Card> */}
+
+            {/* Select Component */}
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-indigo-500 rounded-full"></div>
+                  Select
+                </CardTitle>
+                <CardDescription>Auswahllisten für Formulare</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Select>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Auswählen" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">Option 1</SelectItem>
+                    <SelectItem value="2">Option 2</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-sm text-muted-foreground mt-2">Angepasste Auswahllisten</p>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+
+        {/* Interactive Demo Section */}
+        <section className="mb-12">
+          <h2 className="text-2xl font-bold mb-6">Interaktive Demo</h2>
+          <Card>
+            <CardHeader>
+              <CardTitle>Benutzerprofil Editor</CardTitle>
+              <CardDescription>Eine praktische Demo, die mehrere Komponenten kombiniert</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* User Info */}
+                <div className="space-y-6">
+                  <div className="flex items-center gap-4">
+                    <Avatar className="h-16 w-16">
+                      <AvatarImage src="/avatars/demo.png" alt="Demo User" />
+                      <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white">
+                        DU
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <h3 className="font-semibold">Demo Benutzer</h3>
+                      <p className="text-sm text-muted-foreground">Software Engineer</p>
+                      {/* <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" size="sm" className="mt-2">
+                            Profil bearbeiten
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          <DropdownMenuItem>Foto ändern</DropdownMenuItem>
+                          <DropdownMenuItem>Profilinfo bearbeiten</DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem>Privatsphäre</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu> */}
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="demo-name">Name</Label>
+                      <Input id="demo-name" placeholder="Vollständiger Name" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="demo-email">Email</Label>
+                      <Input id="demo-email" type="email" placeholder="email@beispiel.de" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Settings */}
+                <div className="space-y-6">
+                  <h4 className="font-medium">Einstellungen</h4>
+
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="demo-theme">Theme</Label>
+                      <Select>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Theme wählen" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="light">Hell</SelectItem>
+                          <SelectItem value="dark">Dunkel</SelectItem>
+                          <SelectItem value="system">System</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="demo-language">Sprache</Label>
+                      <Select>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sprache wählen" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="de">Deutsch</SelectItem>
+                          <SelectItem value="en">English</SelectItem>
+                          <SelectItem value="fr">Français</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="demo-notifications">Benachrichtigungen</Label>
+                      {/* <DropdownMenuCheckboxItem
+                        checked={checkboxItems.notifications}
+                        onCheckedChange={(checked) => setCheckboxItems({...checkboxItems, notifications: !!checked})}
+                      >
+                        Aktiviert
+                      </DropdownMenuCheckboxItem> */}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="space-y-6">
+                  <h4 className="font-medium">Aktionen</h4>
+
+                  <div className="space-y-3">
+                    <Button className="w-full" variant="outline">
+                      <Download className="mr-2 h-4 w-4" />
+                      Daten exportieren
+                    </Button>
+
+                    <Button className="w-full" variant="outline">
+                      <Settings className="mr-2 h-4 w-4" />
+                      Erweiterte Einstellungen
+                    </Button>
+
+                    <div className="pt-4 border-t">
+                      <Button variant="destructive" className="w-full">
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Konto löschen
+                      </Button>
+                      <p className="text-xs text-muted-foreground mt-2 text-center">
+                        Diese Aktion kann nicht rückgängig gemacht werden
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-3 justify-end mt-8 pt-6 border-t">
+                <Button variant="outline">Abbrechen</Button>
+                <Button>Änderungen speichern</Button>
+              </div>
+            </CardContent>
+          </Card>
         </section>
 
         {/* Authentication Components */}

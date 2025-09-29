@@ -1,38 +1,46 @@
 # Testing Setup für OK9 SaaS Starter Kit
 
-Diese Dokumentation beschreibt das Test-Setup für das OK9 SaaS Starter Kit.
+> **Version:** 1.2.0
+> **Letzte Aktualisierung:** 2024-09-29
+> **Status:** Production Ready
 
-## Test-Framework
+### 🔗 Verwandte Dokumentation
+- [Claude Code Configuration](./CLAUDE.md)
+- [Product Requirements Document](./OK9-SaaS-Starter-Kit-PRD.md)
+- [Frontend Components](./src/components/README.md)
 
-Das Projekt verwendet **Jest** als Test-Runner in Kombination mit **React Testing Library** für Komponententests.
+## 🧪 Test-Framework
+
+Das Projekt verwendet **Vitest** als Test-Runner in Kombination mit **React Testing Library** für Komponententests.
 
 ### Installierte Abhängigkeiten
 
-- `jest` - Test-Runner
-- `@types/jest` - TypeScript-Typen für Jest
-- `jest-environment-jsdom` - DOM-Umgebung für Tests
+- `vitest` - Test-Runner (Vite-basiert)
+- `@vitest/ui` - Test UI Interface
+- `jsdom` - DOM-Umgebung für Tests
 - `@testing-library/react` - React Testing Utilities
-- `@testing-library/jest-dom` - Jest DOM Matchers
+- `@testing-library/jest-dom` - DOM Matchers
 - `@testing-library/user-event` - User Event Simulation
 
-## Test-Konfiguration
+## ⚙️ Test-Konfiguration
 
-### Jest Konfiguration (`jest.config.js`)
+### Vitest Konfiguration (`vitest.config.ts`)
 
-Die Jest-Konfiguration ist für Next.js optimiert und beinhaltet:
+Die Vitest-Konfiguration ist für Next.js optimiert und beinhaltet:
 
 - **Module Aliases**: Unterstützung für `@/`-Importe
 - **Test Environment**: jsdom für DOM-Tests
-- **Setup**: Automatisches Setup mit `jest.setup.js`
-- **Coverage**: Coverage-Berichte für alle relevanten Dateien
+- **Setup**: Automatisches Setup mit `vitest.setup.ts`
+- **Coverage**: Coverage-Berichte mit V8 Provider
+- **UI Interface**: Web-basierte Test-UI
 
-### Test Setup (`jest.setup.js`)
+### Test Setup (`vitest.setup.ts`)
 
 Das Setup beinhaltet:
 
-- **DOM Matchers**: Erweiterte Jest-DOM-Matcher
+- **DOM Matchers**: Erweiterte DOM-Matcher
 - **Mocks**: Next.js Router, Navigation und Authentication
-- **Polyfills**: fetch-Polyfill für Node.js-Umgebung
+- **Global Setup**: Globale Test-Konfiguration
 - **Environment Variables**: Test-Umgebungsvariablen
 
 ## Test-Scripts
@@ -49,8 +57,8 @@ npm run test:watch
 # Tests mit Coverage-Bericht
 npm run test:coverage
 
-# Ausführliche Test-Ausgabe
-npm run test:verbose
+# Test UI Interface öffnen
+npm run test:ui
 ```
 
 ## Test-Struktur

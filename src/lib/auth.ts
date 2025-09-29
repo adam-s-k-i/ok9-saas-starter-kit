@@ -2,8 +2,6 @@ import type { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import GitHubProvider from "next-auth/providers/github"
 import GoogleProvider from "next-auth/providers/google"
-import { PrismaAdapter } from "@auth/prisma-adapter"
-import { prisma } from "./prisma"
 
 // Extend the built-in session types
 declare module "next-auth" {
@@ -18,7 +16,6 @@ declare module "next-auth" {
 }
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma) as NextAuthOptions['adapter'],
   providers: [
     // Development credentials provider for testing
     CredentialsProvider({
@@ -29,24 +26,11 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         // In development, allow any email for testing
         if (process.env.NODE_ENV === 'development') {
-          // Check if user exists, create if not
-          let user = await prisma.user.findUnique({
-            where: { email: credentials?.email || 'dev@example.com' }
-          })
-
-          if (!user) {
-            user = await prisma.user.create({
-              data: {
-                email: credentials?.email || 'dev@example.com',
-                name: 'Development User',
-              }
-            })
-          }
-
+          // Simple development user without database
           return {
-            id: user.id,
-            email: user.email,
-            name: user.name,
+            id: '1',
+            email: credentials?.email || 'dev@example.com',
+            name: 'Development User',
           }
         }
         return null

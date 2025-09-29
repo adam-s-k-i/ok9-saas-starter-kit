@@ -20,8 +20,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Check if Clerk is properly configured
     const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
-    const hasValidClerkKey = Boolean(publishableKey && publishableKey !== 'pk_test_development_key')
-    setIsClerkActive(hasValidClerkKey)
+    // Use Clerk only if we have a valid production publishable key
+    const isValidClerkKey = publishableKey &&
+      publishableKey.startsWith('pk_live_') &&
+      publishableKey.length > 20;
+    setIsClerkActive(!!isValidClerkKey)
   }, [])
 
   const isAuthenticated = isClerkActive ? false : !!session // For now, we'll use NextAuth when Clerk is not active

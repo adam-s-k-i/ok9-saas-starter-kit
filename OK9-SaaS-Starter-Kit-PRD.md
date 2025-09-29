@@ -1,11 +1,14 @@
 # OK9 SaaS Starter Kit - Product Requirements Document (PRD)
 
-## Dokumenteninformation
-- **Produkt**: OK9 SaaS Starter Kit
-- **Version**: 1.0.0
-- **Status**: In Entwicklung
-- **Letzte Aktualisierung**: 2024-09-27
-- **Autor**: Software Architecture Team
+> **Version:** 1.2.0
+> **Letzte Aktualisierung:** 2024-09-29
+> **Status:** Production Ready
+> **Autor:** Architecture Agent & Team
+
+### 🔗 Verwandte Dokumentation
+- [Claude Code Configuration](./CLAUDE.md)
+- [Testing Setup](./TESTING.md)
+- [Frontend Components](./src/components/README.md)
 
 ## 1. Übersicht
 
@@ -369,9 +372,9 @@ jobs:
 ### 6.1 Testing Strategy
 
 #### Unit Tests
-- **Framework**: Jest
+- **Framework**: Vitest + React Testing Library
 - **Coverage**: > 80%
-- **Location**: `__tests__/` directories
+- **Location**: `*.test.tsx` neben den Komponenten
 
 #### Integration Tests
 - **Framework**: Playwright

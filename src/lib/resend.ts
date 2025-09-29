@@ -3,9 +3,17 @@ import { render } from '@react-email/render'
 import WelcomeEmail from '@/emails/WelcomeEmail'
 import InvoiceEmail from '@/emails/InvoiceEmail'
 
-export const resend = new Resend(process.env.RESEND_API_KEY)
+// Initialize Resend only if API key is available
+export const resend = process.env.RESEND_API_KEY
+  ? new Resend(process.env.RESEND_API_KEY)
+  : null
 
 export const sendWelcomeEmail = async (email: string, name?: string) => {
+  if (!resend) {
+    console.log('⚠️  Resend API key not configured, skipping welcome email')
+    return
+  }
+
   try {
     const emailHtml = await render(WelcomeEmail({ name }))
 
@@ -28,6 +36,11 @@ export const sendInvoiceEmail = async (
   invoice: { id: string; amount: number; currency: string; status: string; createdAt: string },
   userName?: string
 ) => {
+  if (!resend) {
+    console.log('⚠️  Resend API key not configured, skipping invoice email')
+    return
+  }
+
   try {
     const emailHtml = await render(InvoiceEmail({ invoice, userName }))
 
@@ -46,6 +59,11 @@ export const sendInvoiceEmail = async (
 }
 
 export const sendPasswordResetEmail = async (email: string, resetToken: string) => {
+  if (!resend) {
+    console.log('⚠️  Resend API key not configured, skipping password reset email')
+    return
+  }
+
   try {
     const resetUrl = `${process.env.NEXTAUTH_URL}/auth/reset-password?token=${resetToken}`
 

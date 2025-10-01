@@ -13,10 +13,12 @@ export const dynamic = 'force-dynamic'
 export default function SignInPage() {
   const [email, setEmail] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const handleCredentialsSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
+    setError('')
 
     try {
       const result = await signIn('credentials', {
@@ -26,12 +28,14 @@ export default function SignInPage() {
 
       if (result?.error) {
         console.error('Sign in error:', result.error)
+        setError('Invalid email. Please use one of the test emails listed below.')
       } else {
         // Redirect to home page after successful sign in
         window.location.href = '/'
       }
     } catch (error) {
       console.error('Sign in error:', error)
+      setError('An unexpected error occurred. Please try again.')
     } finally {
       setIsLoading(false)
     }
@@ -56,21 +60,40 @@ export default function SignInPage() {
             <form onSubmit={handleCredentialsSignIn} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email (Development)</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="dev@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
+                 <Input
+                   id="email"
+                   type="email"
+                   placeholder="dev@example.com"
+                   value={email}
+                   onChange={(e) => {
+                     setEmail(e.target.value)
+                     setError('')
+                   }}
+                   required
+                 />
               </div>
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? 'Wird angemeldet...' : 'Mit Email anmelden'}
-              </Button>
-            </form>
+               <div className="flex gap-2">
+                 <Button type="submit" className="flex-1" disabled={isLoading}>
+                   {isLoading ? 'Wird angemeldet...' : 'Mit Email anmelden'}
+                 </Button>
+                 <Button
+                   type="button"
+                   variant="outline"
+                   onClick={() => setEmail('')}
+                   disabled={isLoading}
+                 >
+                   Clear
+                 </Button>
+                </div>
+             </form>
 
-            <div className="relative">
+             {error && (
+               <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
+                 {error}
+               </div>
+             )}
+
+             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t" />
               </div>
@@ -99,10 +122,10 @@ export default function SignInPage() {
               </Button>
             </div>
 
-            <p className="text-xs text-muted-foreground text-center">
-              In der Entwicklung können Sie jede Email verwenden.
-              Für OAuth müssen Sie die Umgebungsvariablen konfigurieren.
-            </p>
+             <p className="text-xs text-muted-foreground text-center">
+               Test emails: admin@example.com, user@example.com, premium@example.com, moderator@example.com
+               Für OAuth müssen Sie die Umgebungsvariablen konfigurieren.
+             </p>
           </CardContent>
         </Card>
       </div>

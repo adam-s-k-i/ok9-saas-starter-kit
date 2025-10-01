@@ -41,8 +41,38 @@ export default function SignInPage() {
     }
   }
 
-  const handleOAuthSignIn = (provider: string) => {
-    signIn(provider, { callbackUrl: '/dashboard' })
+  const handleOAuthSignIn = async (provider: string) => {
+    try {
+      setIsLoading(true)
+      setError('')
+
+      console.log(`Starting ${provider} OAuth sign in...`)
+
+      const result = await signIn(provider, {
+        callbackUrl: '/dashboard',
+        redirect: false
+      })
+
+      console.log(`${provider} sign in result:`, result)
+
+      if (result?.error) {
+        console.error(`${provider} sign in error:`, result.error)
+        setError(`${provider} Anmeldung fehlgeschlagen: ${result.error}`)
+      } else if (result?.url) {
+        console.log(`Redirecting to: ${result.url}`)
+        window.location.href = result.url
+      } else if (result?.ok) {
+        console.log(`${provider} sign in successful, redirecting to dashboard...`)
+        window.location.href = '/dashboard'
+      } else {
+        console.log(`${provider} sign in completed without specific result`)
+      }
+    } catch (error) {
+      console.error(`${provider} sign in exception:`, error)
+      setError(`Unerwarteter Fehler bei der ${provider} Anmeldung: ${error}`)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (

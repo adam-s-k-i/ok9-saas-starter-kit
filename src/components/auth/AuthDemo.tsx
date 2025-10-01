@@ -32,9 +32,16 @@ export default function AuthDemo() {
               ) : session ? (
                 <div className="space-y-2">
                   <p className="text-sm">Angemeldet als: <strong>{session.user?.email}</strong></p>
-                  <Button onClick={() => signOut()} variant="outline" size="sm">
-                    Abmelden
-                  </Button>
+                   <Button
+                     onClick={async () => {
+                       await signOut({ redirect: false })
+                       window.location.href = '/'
+                     }}
+                     variant="outline"
+                     size="sm"
+                   >
+                     Abmelden
+                   </Button>
                 </div>
               ) : (
                 <div className="space-y-2">

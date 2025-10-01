@@ -1,8 +1,9 @@
 'use client'
 
 import { Button } from "@/components/ui/button"
-import { LogIn, LayoutDashboard } from "lucide-react"
-import { useUser, SignInButton } from '@clerk/nextjs'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { LogIn, LayoutDashboard, LogOut, User } from "lucide-react"
+import { useUser, SignInButton, SignOutButton } from '@clerk/nextjs'
 import Link from 'next/link'
 
 export default function UserButton() {
@@ -10,12 +11,28 @@ export default function UserButton() {
 
   if (clerkUser) {
     return (
-      <Link href="/dashboard">
-        <Button variant="outline" size="sm">
-          <LayoutDashboard className="w-4 h-4 mr-2" />
-          Dashboard
-        </Button>
-      </Link>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" size="sm">
+            <User className="w-4 h-4 mr-2" />
+            {clerkUser.firstName || clerkUser.emailAddresses[0]?.emailAddress || 'Benutzer'}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem asChild>
+            <Link href="/dashboard">
+              <LayoutDashboard className="w-4 h-4 mr-2" />
+              Dashboard
+            </Link>
+          </DropdownMenuItem>
+          <SignOutButton>
+            <DropdownMenuItem>
+              <LogOut className="w-4 h-4 mr-2" />
+              Abmelden
+            </DropdownMenuItem>
+          </SignOutButton>
+        </DropdownMenuContent>
+      </DropdownMenu>
     )
   }
 

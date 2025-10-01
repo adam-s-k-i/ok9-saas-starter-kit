@@ -20,6 +20,7 @@ export function useRBAC() {
   const canEditUsers = hasRole('moderator')
   const canDeleteUsers = hasRole('admin')
   const canViewUsers = hasRole('moderator')
+  const canViewLogs = hasRole('admin')
 
   const canEditUser = (targetUserId: string, targetUserRole?: UserRole): boolean => {
     // Users can edit themselves
@@ -57,6 +58,7 @@ export function useRBAC() {
     canEditUsers,
     canDeleteUsers,
     canViewUsers,
+    canViewLogs,
     canEditUser,
     canDeleteUser,
   }

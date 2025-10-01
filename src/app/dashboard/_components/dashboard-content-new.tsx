@@ -13,6 +13,7 @@ import {
   BarChart3,
   Calendar,
   CreditCard,
+  FileText,
   Key,
   TrendingUp,
   Users,
@@ -78,18 +79,30 @@ export function DashboardContent({ overview }: DashboardContentProps) {
               Echtzeit-Überblick über Nutzer, Umsatz und Systemgesundheit
             </p>
           </div>
-          <div className="flex gap-3">
-            <Button variant="outline" asChild>
-              <Link href="/dashboard/billing">
-                <CreditCard className="mr-2 h-4 w-4" />
-                Abonnement
-              </Link>
-            </Button>
-            <Button variant="outline">
-              <Activity className="mr-2 h-4 w-4" />
-              Analytics
-            </Button>
-          </div>
+           <div className="flex gap-3">
+             <Button variant="outline" asChild>
+               <Link href="/dashboard/users">
+                 <Users className="mr-2 h-4 w-4" />
+                 Benutzer
+               </Link>
+             </Button>
+             <Button variant="outline" asChild>
+               <Link href="/dashboard/logs">
+                 <FileText className="mr-2 h-4 w-4" />
+                 Logs
+               </Link>
+             </Button>
+             <Button variant="outline" asChild>
+               <Link href="/dashboard/billing">
+                 <CreditCard className="mr-2 h-4 w-4" />
+                 Abonnement
+               </Link>
+             </Button>
+             <Button variant="outline">
+               <Activity className="mr-2 h-4 w-4" />
+               Analytics
+             </Button>
+           </div>
         </header>
 
         <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">

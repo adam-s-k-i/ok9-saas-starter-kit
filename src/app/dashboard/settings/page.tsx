@@ -5,18 +5,30 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+
 import { useSession } from 'next-auth/react'
 import { useState } from 'react'
+import { useRBAC } from '@/hooks/use-rbac'
 
 export const dynamic = 'force-dynamic'
 
 export default function SettingsPage() {
   const { data: session } = useSession()
+  const { hasRole } = useRBAC()
+  const isAdmin = hasRole('admin')
+
   const [formData, setFormData] = useState({
     name: session?.user?.name || '',
     email: session?.user?.email || '',
     company: 'Beispiel GmbH',
     phone: '+49 123 456789',
+  })
+
+  const [systemSettings, setSystemSettings] = useState({
+    maintenanceMode: false,
+    registrationEnabled: true,
+    emailNotifications: true,
+    analyticsEnabled: true,
   })
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -178,11 +190,92 @@ export default function SettingsPage() {
                     🌍 Sprache
                   </Button>
                 </CardContent>
-              </Card>
-            </div>
-          </div>
-        </div>
-      </div>
-    </AuthGuard>
-  )
-}
+               </Card>
+
+               {/* System Settings - Admin Only */}
+               {isAdmin && (
+                 <Card>
+                   <CardHeader>
+                     <CardTitle>Systemeinstellungen</CardTitle>
+                     <CardDescription>
+                       Globale Konfiguration und Feature-Flags
+                     </CardDescription>
+                   </CardHeader>
+                   <CardContent className="space-y-6">
+                     <div className="flex items-center justify-between">
+                       <div>
+                         <p className="font-medium">Wartungsmodus</p>
+                         <p className="text-sm text-muted-foreground">
+                           Blockiert alle Benutzeraktionen für Wartungsarbeiten
+                         </p>
+                       </div>
+                       <input
+                         type="checkbox"
+                         checked={systemSettings.maintenanceMode}
+                         onChange={(e) =>
+                           setSystemSettings(prev => ({ ...prev, maintenanceMode: e.target.checked }))
+                         }
+                         className="rounded"
+                       />
+                     </div>
+                     <div className="flex items-center justify-between">
+                       <div>
+                         <p className="font-medium">Registrierung aktiv</p>
+                         <p className="text-sm text-muted-foreground">
+                           Erlaubt neuen Benutzern sich zu registrieren
+                         </p>
+                       </div>
+                       <input
+                         type="checkbox"
+                         checked={systemSettings.registrationEnabled}
+                         onChange={(e) =>
+                           setSystemSettings(prev => ({ ...prev, registrationEnabled: e.target.checked }))
+                         }
+                         className="rounded"
+                       />
+                     </div>
+                     <div className="flex items-center justify-between">
+                       <div>
+                         <p className="font-medium">E-Mail-Benachrichtigungen</p>
+                         <p className="text-sm text-muted-foreground">
+                           Systemweite E-Mail-Benachrichtigungen
+                         </p>
+                       </div>
+                       <input
+                         type="checkbox"
+                         checked={systemSettings.emailNotifications}
+                         onChange={(e) =>
+                           setSystemSettings(prev => ({ ...prev, emailNotifications: e.target.checked }))
+                         }
+                         className="rounded"
+                       />
+                     </div>
+                     <div className="flex items-center justify-between">
+                       <div>
+                         <p className="font-medium">Analytics aktiviert</p>
+                         <p className="text-sm text-muted-foreground">
+                           Sammelt Nutzungsdaten für Verbesserungen
+                         </p>
+                       </div>
+                       <input
+                         type="checkbox"
+                         checked={systemSettings.analyticsEnabled}
+                         onChange={(e) =>
+                           setSystemSettings(prev => ({ ...prev, analyticsEnabled: e.target.checked }))
+                         }
+                         className="rounded"
+                       />
+                     </div>
+                     <Button type="button" className="w-full">
+                       Systemeinstellungen speichern
+                     </Button>
+                   </CardContent>
+                 </Card>
+               )}
+             </div>
+           </div>
+         </div>
+       </div>
+     </AuthGuard>
+   )
+ }

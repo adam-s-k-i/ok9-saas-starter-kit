@@ -42,21 +42,15 @@ export default function SignInPage() {
   }
 
   const handleOAuthSignIn = (provider: string) => {
-    console.log(`Starting ${provider} OAuth sign in with default redirect...`)
+    console.log(`Starting ${provider} OAuth sign in...`)
     console.log(`Provider: ${provider}`)
+    console.log(`Callback URL: /dashboard`)
     console.log(`NEXTAUTH_URL: ${process.env.NEXTAUTH_URL}`)
     console.log(`GITHUB_ID exists: ${!!process.env.GITHUB_ID}`)
     console.log(`GITHUB_SECRET exists: ${!!process.env.GITHUB_SECRET}`)
 
-    // Use default NextAuth behavior - this should redirect to GitHub
+    // Use default NextAuth behavior - this should redirect to GitHub OAuth
     signIn(provider, { callbackUrl: '/dashboard' })
-  }
-    } catch (error) {
-      console.error(`${provider} sign in exception:`, error)
-      setError(`Unerwarteter Fehler bei der ${provider} Anmeldung: ${error}`)
-    } finally {
-      setIsLoading(false)
-    }
   }
 
   return (
@@ -74,40 +68,40 @@ export default function SignInPage() {
             <form onSubmit={handleCredentialsSignIn} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email (Development)</Label>
-                 <Input
-                   id="email"
-                   type="email"
-                   placeholder="dev@example.com"
-                   value={email}
-                   onChange={(e) => {
-                     setEmail(e.target.value)
-                     setError('')
-                   }}
-                   required
-                 />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="dev@example.com"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value)
+                    setError('')
+                  }}
+                  required
+                />
               </div>
-               <div className="flex gap-2">
-                 <Button type="submit" className="flex-1" disabled={isLoading}>
-                   {isLoading ? 'Wird angemeldet...' : 'Mit Email anmelden'}
-                 </Button>
-                 <Button
-                   type="button"
-                   variant="outline"
-                   onClick={() => setEmail('')}
-                   disabled={isLoading}
-                 >
-                   Clear
-                 </Button>
-                </div>
-             </form>
+              <div className="flex gap-2">
+                <Button type="submit" className="flex-1" disabled={isLoading}>
+                  {isLoading ? 'Wird angemeldet...' : 'Mit Email anmelden'}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setEmail('')}
+                  disabled={isLoading}
+                >
+                  Clear
+                </Button>
+              </div>
+            </form>
 
-             {error && (
-               <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
-                 {error}
-               </div>
-             )}
+            {error && (
+              <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
+                {error}
+              </div>
+            )}
 
-             <div className="relative">
+            <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t" />
               </div>
@@ -118,30 +112,30 @@ export default function SignInPage() {
               </div>
             </div>
 
-             {/* OAuth Providers */}
-             <div className="space-y-2">
-               <Button
-                 variant="outline"
-                 className="w-full"
-                 onClick={() => handleOAuthSignIn('github')}
-                 disabled={isLoading}
-               >
-                 {isLoading ? 'Wird angemeldet...' : 'GitHub'}
-               </Button>
-               <Button
-                 variant="outline"
-                 className="w-full"
-                 onClick={() => handleOAuthSignIn('google')}
-                 disabled={isLoading}
-               >
-                 {isLoading ? 'Wird angemeldet...' : 'Google'}
-               </Button>
-             </div>
+            {/* OAuth Providers */}
+            <div className="space-y-2">
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => handleOAuthSignIn('github')}
+                disabled={isLoading}
+              >
+                {isLoading ? 'Wird angemeldet...' : 'GitHub'}
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => handleOAuthSignIn('google')}
+                disabled={isLoading}
+              >
+                {isLoading ? 'Wird angemeldet...' : 'Google'}
+              </Button>
+            </div>
 
-             <p className="text-xs text-muted-foreground text-center">
-               Test emails: admin@example.com, user@example.com, premium@example.com, moderator@example.com
-               Für OAuth: Konfigurieren Sie GITHUB_ID/GITHUB_SECRET und GOOGLE_CLIENT_ID/GOOGLE_CLIENT_SECRET in .env.local
-             </p>
+            <p className="text-xs text-muted-foreground text-center">
+              Test emails: admin@example.com, user@example.com, premium@example.com, moderator@example.com
+              Für OAuth: Konfigurieren Sie GITHUB_ID/GITHUB_SECRET und GOOGLE_CLIENT_ID/GOOGLE_CLIENT_SECRET in .env.local
+            </p>
           </CardContent>
         </Card>
       </div>

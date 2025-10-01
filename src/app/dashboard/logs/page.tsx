@@ -42,8 +42,12 @@ interface ApiResponse {
 export const dynamic = 'force-dynamic'
 
 export default function LogsPage() {
-  const { hasRole } = useRBAC()
+  const { hasRole, userRole } = useRBAC()
   const canViewLogs = hasRole('admin')
+
+  // Debug: Zeige Rolle in Konsole
+  console.log('User role:', userRole)
+  console.log('Can view logs:', canViewLogs)
 
   const [searchTerm, setSearchTerm] = useState('')
   const [actionFilter, setActionFilter] = useState<string>('all')
@@ -160,8 +164,14 @@ export default function LogsPage() {
             <CardContent className="flex flex-col items-center justify-center py-12">
               <Shield className="h-12 w-12 text-muted-foreground mb-4" />
               <h3 className="text-lg font-semibold mb-2">Zugriff verweigert</h3>
-              <p className="text-muted-foreground text-center">
+              <p className="text-muted-foreground text-center mb-4">
                 Sie haben keine Berechtigung, Logs anzusehen. Wenden Sie sich an einen Administrator.
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Ihre aktuelle Rolle: <strong>{userRole || 'unbekannt'}</strong>
+              </p>
+              <p className="text-xs text-muted-foreground mt-2">
+                Für Admin-Zugriff melden Sie sich mit admin@example.com an.
               </p>
             </CardContent>
           </Card>

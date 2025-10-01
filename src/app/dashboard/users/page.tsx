@@ -45,7 +45,11 @@ interface ApiResponse {
 }
 
 export default function UsersPage() {
-  const { canCreateUsers, canEditUser, canDeleteUser, canViewUsers } = useRBAC()
+  const { canCreateUsers, canEditUser, canDeleteUser, canViewUsers, userRole } = useRBAC()
+
+  // Debug: Zeige Rolle in Konsole
+  console.log('User role:', userRole)
+  console.log('Can view users:', canViewUsers)
 
   const [searchTerm, setSearchTerm] = useState('')
   const [roleFilter, setRoleFilter] = useState<string>('all')
@@ -803,17 +807,23 @@ export default function UsersPage() {
                 )}
               </CardContent>
             </Card>
-          ) : (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <Shield className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Zugriff verweigert</h3>
-                <p className="text-muted-foreground text-center">
-                  Sie haben keine Berechtigung, Benutzer anzusehen. Wenden Sie sich an einen Administrator.
-                </p>
-              </CardContent>
-            </Card>
-          )}
+           ) : (
+             <Card>
+               <CardContent className="flex flex-col items-center justify-center py-12">
+                 <Shield className="h-12 w-12 text-muted-foreground mb-4" />
+                 <h3 className="text-lg font-semibold mb-2">Zugriff verweigert</h3>
+                 <p className="text-muted-foreground text-center mb-4">
+                   Sie haben keine Berechtigung, Benutzer anzusehen. Wenden Sie sich an einen Administrator.
+                 </p>
+                 <p className="text-xs text-muted-foreground">
+                   Ihre aktuelle Rolle: <strong>{userRole || 'unbekannt'}</strong>
+                 </p>
+                 <p className="text-xs text-muted-foreground mt-2">
+                   Moderatoren und Admins haben Zugriff auf diese Seite.
+                 </p>
+               </CardContent>
+             </Card>
+           )}
 
           {/* Benutzerstatistiken */}
           {canViewUsers && (

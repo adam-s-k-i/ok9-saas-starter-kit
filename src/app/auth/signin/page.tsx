@@ -41,32 +41,16 @@ export default function SignInPage() {
     }
   }
 
-  const handleOAuthSignIn = async (provider: string) => {
-    try {
-      setIsLoading(true)
-      setError('')
+  const handleOAuthSignIn = (provider: string) => {
+    console.log(`Starting ${provider} OAuth sign in with default redirect...`)
+    console.log(`Provider: ${provider}`)
+    console.log(`NEXTAUTH_URL: ${process.env.NEXTAUTH_URL}`)
+    console.log(`GITHUB_ID exists: ${!!process.env.GITHUB_ID}`)
+    console.log(`GITHUB_SECRET exists: ${!!process.env.GITHUB_SECRET}`)
 
-      console.log(`Starting ${provider} OAuth sign in...`)
-
-      const result = await signIn(provider, {
-        callbackUrl: '/dashboard',
-        redirect: false
-      })
-
-      console.log(`${provider} sign in result:`, result)
-
-      if (result?.error) {
-        console.error(`${provider} sign in error:`, result.error)
-        setError(`${provider} Anmeldung fehlgeschlagen: ${result.error}`)
-      } else if (result?.url) {
-        console.log(`Redirecting to: ${result.url}`)
-        window.location.href = result.url
-      } else if (result?.ok) {
-        console.log(`${provider} sign in successful, redirecting to dashboard...`)
-        window.location.href = '/dashboard'
-      } else {
-        console.log(`${provider} sign in completed without specific result`)
-      }
+    // Use default NextAuth behavior - this should redirect to GitHub
+    signIn(provider, { callbackUrl: '/dashboard' })
+  }
     } catch (error) {
       console.error(`${provider} sign in exception:`, error)
       setError(`Unerwarteter Fehler bei der ${provider} Anmeldung: ${error}`)

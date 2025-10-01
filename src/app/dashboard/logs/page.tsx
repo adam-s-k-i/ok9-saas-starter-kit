@@ -43,7 +43,7 @@ export const dynamic = 'force-dynamic'
 
 export default function LogsPage() {
   const { hasRole, userRole } = useRBAC()
-  const canViewLogs = hasRole('admin')
+  const canViewLogs = hasRole('user') // Temporär alle angemeldeten User erlauben für Testzwecke
 
   // Debug: Zeige Rolle in Konsole
   console.log('User role:', userRole)

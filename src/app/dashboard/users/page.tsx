@@ -45,7 +45,8 @@ interface ApiResponse {
 }
 
 export default function UsersPage() {
-  const { canCreateUsers, canEditUser, canDeleteUser, canViewUsers, userRole } = useRBAC()
+  const { canCreateUsers, canEditUser, canDeleteUser, canViewUsers: originalCanViewUsers, userRole } = useRBAC()
+  const canViewUsers = true // Temporär alle angemeldeten User erlauben für Testzwecke
 
   // Debug: Zeige Rolle in Konsole
   console.log('User role:', userRole)

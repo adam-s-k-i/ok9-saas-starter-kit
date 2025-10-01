@@ -98,9 +98,11 @@ export function DashboardContent({ overview }: DashboardContentProps) {
                  Abonnement
                </Link>
              </Button>
-             <Button variant="outline">
-               <Activity className="mr-2 h-4 w-4" />
-               Analytics
+             <Button variant="outline" asChild>
+               <Link href="/dashboard/analytics">
+                 <Activity className="mr-2 h-4 w-4" />
+                 Analytics
+               </Link>
              </Button>
            </div>
         </header>

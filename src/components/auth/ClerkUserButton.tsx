@@ -26,7 +26,11 @@ export default function UserButton() {
             </Link>
           </DropdownMenuItem>
           <SignOutButton>
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => {
+              // Clerk SignOutButton sollte automatisch funktionieren
+              // Als Fallback erzwingen wir eine Weiterleitung
+              setTimeout(() => window.location.href = '/', 100)
+            }}>
               <LogOut className="w-4 h-4 mr-2" />
               Abmelden
             </DropdownMenuItem>

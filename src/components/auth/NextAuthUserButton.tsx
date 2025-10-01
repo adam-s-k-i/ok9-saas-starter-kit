@@ -25,7 +25,10 @@ export default function UserButton() {
               Dashboard
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => signOut({ callbackUrl: '/' })}>
+          <DropdownMenuItem onClick={async () => {
+            await signOut({ callbackUrl: '/' })
+            window.location.href = '/'
+          }}>
             <LogOut className="w-4 h-4 mr-2" />
             Abmelden
           </DropdownMenuItem>
@@ -35,9 +38,11 @@ export default function UserButton() {
   }
 
   return (
-    <Button variant="outline" size="sm" onClick={() => signIn()}>
-      <LogIn className="w-4 h-4 mr-2" />
-      Anmelden
-    </Button>
+    <Link href="/auth/signin">
+      <Button variant="outline" size="sm">
+        <LogIn className="w-4 h-4 mr-2" />
+        Anmelden
+      </Button>
+    </Link>
   )
 }

@@ -41,8 +41,26 @@ export default function SignInPage() {
     }
   }
 
-  const handleOAuthSignIn = (provider: string) => {
-    signIn(provider, { callbackUrl: '/' })
+  const handleOAuthSignIn = async (provider: string) => {
+    try {
+      setIsLoading(true)
+      const result = await signIn(provider, {
+        callbackUrl: '/',
+        redirect: false
+      })
+
+      if (result?.error) {
+        console.error(`${provider} sign in error:`, result.error)
+        setError(`${provider} Anmeldung fehlgeschlagen. Überprüfe die OAuth-Konfiguration.`)
+      } else if (result?.url) {
+        window.location.href = result.url
+      }
+    } catch (error) {
+      console.error(`${provider} sign in error:`, error)
+      setError(`Unerwarteter Fehler bei der ${provider} Anmeldung.`)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -104,23 +122,25 @@ export default function SignInPage() {
               </div>
             </div>
 
-            {/* OAuth Providers */}
-            <div className="space-y-2">
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => handleOAuthSignIn('github')}
-              >
-                GitHub
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => handleOAuthSignIn('google')}
-              >
-                Google
-              </Button>
-            </div>
+             {/* OAuth Providers */}
+             <div className="space-y-2">
+               <Button
+                 variant="outline"
+                 className="w-full"
+                 onClick={() => handleOAuthSignIn('github')}
+                 disabled={isLoading}
+               >
+                 {isLoading ? 'Wird angemeldet...' : 'GitHub'}
+               </Button>
+               <Button
+                 variant="outline"
+                 className="w-full"
+                 onClick={() => handleOAuthSignIn('google')}
+                 disabled={isLoading}
+               >
+                 {isLoading ? 'Wird angemeldet...' : 'Google'}
+               </Button>
+             </div>
 
              <p className="text-xs text-muted-foreground text-center">
                Test emails: admin@example.com, user@example.com, premium@example.com, moderator@example.com

@@ -15,6 +15,9 @@ model User {
   email         String    @unique
   name          String?
   image         String?
+  role          String    @default("user") // admin, moderator, user
+  status        String    @default("active") // active, inactive, pending
+  lastLogin     DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -26,6 +29,7 @@ model User {
   subscription  Subscription?
   invoices      Invoice[]
   apiKeys       ApiKey[]
+  auditLogs     AuditLog[]
 
   @@map("users")
 }
@@ -111,4 +115,20 @@ model ApiKey {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("api_keys")
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  userId      String?  // The user who performed the action (null for system actions)
+  action      String   // create, update, delete, login, logout, etc.
+  resource    String   // users, subscriptions, invoices, etc.
+  resourceId  String?  // ID of the affected resource
+  details     Json?    // Additional details about the action
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("audit_logs")
 }

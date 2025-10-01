@@ -34,10 +34,11 @@ describe('Test Helpers', () => {
   describe('form utilities', () => {
     it('fills form fields correctly', async () => {
       renderWithProviders(<LoginForm />)
-      
+
+      // Use German field names that match the labels
       await fillForm({
-        email: 'test@example.com',
-        password: 'password123'
+        'E-Mail': 'test@example.com',
+        'Passwort': 'password123'
       })
 
       expect(screen.getByDisplayValue('test@example.com')).toBeInTheDocument()
@@ -46,14 +47,15 @@ describe('Test Helpers', () => {
 
     it('submits form successfully', async () => {
       renderWithProviders(<LoginForm />)
-      
+
+      // Use German field names that match the labels
       await fillForm({
-        email: 'test@example.com',
-        password: 'password123'
+        'E-Mail': 'test@example.com',
+        'Passwort': 'password123'
       })
 
       await submitForm('Anmelden')
-      
+
       expect(screen.getByRole('button', { name: /wird angemeldet/i })).toBeInTheDocument()
     })
   })

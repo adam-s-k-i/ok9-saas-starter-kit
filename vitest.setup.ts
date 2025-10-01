@@ -19,8 +19,8 @@ vi.mock('next/navigation', () => ({
 
 // Mock Next.js image component
 vi.mock('next/image', () => ({
-  default: (props: any) => {
-    // eslint-disable-next-line jsx-a11y/alt-text, @next/next/no-img-element
+  default: (props: Record<string, unknown>) => {
+
     return React.createElement('img', props)
   },
 }))
@@ -48,7 +48,7 @@ global.fetch = vi.fn(() =>
     ok: true,
     json: () => Promise.resolve({}),
   })
-) as any
+)
 
 // Set environment variables for NextAuth
 process.env.NEXTAUTH_URL = 'http://localhost:3000'

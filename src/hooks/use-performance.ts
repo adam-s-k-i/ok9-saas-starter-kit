@@ -1,45 +1,66 @@
-'use client'
+﻿"use client"
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from "react"
 
 interface PerformanceMetrics {
   loadTime: number
   renderTime: number
   memoryUsage?: number
   isSlowConnection: boolean
+  timeToFirstByte?: number
+  domContentLoaded?: number
+  firstContentfulPaint?: number
 }
 
 export function usePerformance() {
   const [metrics, setMetrics] = useState<PerformanceMetrics | null>(null)
-  const startTime = useRef<number>(Date.now())
+  const loadStartTime = useRef<number>(Date.now())
   const renderStartTime = useRef<number>(Date.now())
 
   useEffect(() => {
     const measurePerformance = () => {
-      const loadTime = Date.now() - startTime.current
+      const loadTime = Date.now() - loadStartTime.current
       const renderTime = Date.now() - renderStartTime.current
-      
-      // Check connection speed
-      const connection = (navigator as unknown as { connection?: { effectiveType?: string } }).connection ||
-                        (navigator as unknown as { mozConnection?: { effectiveType?: string } }).mozConnection ||
-                        (navigator as unknown as { webkitConnection?: { effectiveType?: string } }).webkitConnection
-      const isSlowConnection = connection ? connection.effectiveType === 'slow-2g' || connection.effectiveType === '2g' : false
 
-      // Memory usage (if available)
-      const memoryUsage = (performance as unknown as { memory?: { usedJSHeapSize?: number } }).memory?.usedJSHeapSize
-      
-      setMetrics({
+      const connection = (navigator as Navigator & {
+        connection?: { effectiveType?: string }
+        mozConnection?: { effectiveType?: string }
+        webkitConnection?: { effectiveType?: string }
+      }).connection ||
+        (navigator as Navigator & { mozConnection?: { effectiveType?: string } }).mozConnection ||
+        (navigator as Navigator & { webkitConnection?: { effectiveType?: string } }).webkitConnection
+
+      const isSlowConnection = connection
+        ? connection.effectiveType === "slow-2g" || connection.effectiveType === "2g"
+        : false
+
+      const navigationEntry = performance.getEntriesByType("navigation")[0] as
+        | PerformanceNavigationTiming
+        | undefined
+
+      const paintEntries = performance.getEntriesByType("paint") as PerformanceEntry[]
+      const fcpEntry = paintEntries.find((entry) => entry.name === "first-contentful-paint")
+
+      const metricsPayload: PerformanceMetrics = {
         loadTime,
         renderTime,
-        memoryUsage,
-        isSlowConnection
-      })
+        isSlowConnection,
+        memoryUsage: (performance as Performance & { memory?: { usedJSHeapSize?: number } }).memory?.usedJSHeapSize,
+        timeToFirstByte: navigationEntry
+          ? Math.round(navigationEntry.responseStart - navigationEntry.requestStart)
+          : undefined,
+        domContentLoaded: navigationEntry
+          ? Math.round(navigationEntry.domContentLoadedEventEnd - navigationEntry.startTime)
+          : undefined,
+        firstContentfulPaint: fcpEntry ? Math.round(fcpEntry.startTime) : undefined,
+      }
+
+      setMetrics(metricsPayload)
     }
 
-    // Measure after component mount
-    const timeoutId = setTimeout(measurePerformance, 0)
-    
-    return () => clearTimeout(timeoutId)
+    const timeoutId = window.setTimeout(measurePerformance, 0)
+
+    return () => window.clearTimeout(timeoutId)
   }, [])
 
   const markRenderStart = () => {
@@ -48,27 +69,34 @@ export function usePerformance() {
 
   const markRenderEnd = () => {
     const renderTime = Date.now() - renderStartTime.current
-    setMetrics(prev => prev ? { ...prev, renderTime } : null)
+    setMetrics((previous) =>
+      previous
+        ? { ...previous, renderTime }
+        : {
+            loadTime: renderTime,
+            renderTime,
+            isSlowConnection: false,
+          }
+    )
   }
 
   return {
     metrics,
     markRenderStart,
-    markRenderEnd
+    markRenderEnd,
   }
 }
 
-// Hook for measuring component performance
 export function useComponentPerformance(componentName: string) {
   const { metrics, markRenderStart, markRenderEnd } = usePerformance()
-  
+
   useEffect(() => {
     markRenderStart()
     return () => markRenderEnd()
   }, [componentName])
 
   useEffect(() => {
-    if (metrics && process.env.NODE_ENV === 'development') {
+    if (metrics && process.env.NODE_ENV === "development") {
       console.log(`Performance metrics for ${componentName}:`, metrics)
     }
   }, [metrics, componentName])
@@ -76,7 +104,6 @@ export function useComponentPerformance(componentName: string) {
   return metrics
 }
 
-// Hook for lazy loading with performance tracking
 export function useLazyLoading<T>(
   importFn: () => Promise<T>,
   options?: {
@@ -111,8 +138,6 @@ export function useLazyLoading<T>(
     isLoaded,
     error,
     data,
-    load
+    load,
   }
 }
-
-

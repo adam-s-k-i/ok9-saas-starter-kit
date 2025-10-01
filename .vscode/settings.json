@@ -1,3 +1,9 @@
 {
-    "claudeCodeChat.permissions.yoloMode": true
+    "terminal.integrated.profiles.windows": {
+        "Command Prompt": { "path": ["C:\\Windows\\System32\\cmd.exe"] }
+    },  
+    "terminal.integrated.defaultProfile.windows": "Command Prompt"
+    "claudeCodeChat.permissions.yoloMode": true,
+    "chatgpt.openOnStartup": true
 }
+    

@@ -3,6 +3,8 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ThemeProvider } from '@/contexts/theme-context'
 import { useAppStore } from '@/stores/app-store'
+import { SessionProvider } from 'next-auth/react'
+import type { Session } from 'next-auth'
 
 // Component test utilities
 export const renderWithProviders = (
@@ -10,6 +12,7 @@ export const renderWithProviders = (
   options?: {
     theme?: 'light' | 'dark'
     initialState?: Partial<ReturnType<typeof useAppStore.getState>>
+    session?: Session
   }
 ) => {
   const Wrapper = ({ children }: { children: React.ReactNode }) => {
@@ -17,26 +20,72 @@ export const renderWithProviders = (
     if (options?.initialState) {
       useAppStore.setState(options.initialState)
     }
-    
+
     return (
-      <ThemeProvider>
-        <div data-theme={options?.theme || 'light'}>
-          {children}
-        </div>
-      </ThemeProvider>
+      <SessionProvider session={options?.session}>
+        <ThemeProvider>
+          <div data-theme={options?.theme || 'light'}>
+            {children}
+          </div>
+        </ThemeProvider>
+      </SessionProvider>
     )
   }
-  
+
   return render(ui, { wrapper: Wrapper })
+}
+
+// Auth-specific test utilities
+export const renderWithAuth = (
+  ui: ReactElement,
+  options?: {
+    theme?: 'light' | 'dark'
+    initialState?: Partial<ReturnType<typeof useAppStore.getState>>
+    session?: Session
+  }
+) => {
+  return renderWithProviders(ui, options)
 }
 
 // Form testing utilities
 export const fillForm = async (formData: Record<string, string | boolean>) => {
   const user = userEvent.setup()
-  
+
   for (const [fieldName, value] of Object.entries(formData)) {
-    const field = screen.getByLabelText(new RegExp(fieldName, 'i'))
-    
+    // Try multiple label patterns for better compatibility
+    let field
+    try {
+      // First try exact match
+      field = screen.getByLabelText(fieldName)
+    } catch {
+      try {
+        // Try case-insensitive regex
+        field = screen.getByLabelText(new RegExp(fieldName, 'i'))
+      } catch {
+        // Try common translations/variations
+        const variations = {
+          email: ['email', 'e-mail', 'E-Mail', 'Email'],
+          password: ['password', 'passwort', 'Passwort'],
+          name: ['name', 'Name', 'Vorname', 'Nachname'],
+          remember: ['remember', 'erinnern', 'Angemeldet bleiben']
+        }
+
+        const possibleLabels = variations[fieldName as keyof typeof variations] || [fieldName]
+        for (const label of possibleLabels) {
+          try {
+            field = screen.getByLabelText(new RegExp(label, 'i'))
+            break
+          } catch {
+            continue
+          }
+        }
+
+        if (!field) {
+          throw new Error(`Could not find field with name: ${fieldName}`)
+        }
+      }
+    }
+
     if (typeof value === 'boolean') {
       if (value) {
         await user.click(field)

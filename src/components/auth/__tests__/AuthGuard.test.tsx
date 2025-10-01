@@ -1,8 +1,8 @@
 import React from 'react'
-import { render, screen, waitFor } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import { useRouter } from 'next/navigation'
 import { AuthGuard } from '../AuthGuard'
-import { setMockSession, setMockLoading, setMockUnauthenticated, mockAuthenticatedSession, clearMocks } from '@/__mocks__/next-auth/react'
+import { renderWithAuth } from '@/test-utils/component-test-utils'
 
 // Mock next/navigation (Vitest style)
 vi.mock('next/navigation', () => ({
@@ -19,11 +19,27 @@ const mockRouter = {
   refresh: vi.fn(),
 }
 
+// Mock session data
+const mockAuthenticatedSession = {
+  user: { id: '1', email: 'test@example.com', name: 'Test User' },
+  expires: '2024-12-31T23:59:59.999Z',
+}
+
+const mockUnauthenticatedSession = null
+
 describe('AuthGuard', () => {
   beforeEach(() => {
-    clearMocks()
     mockPush.mockClear()
     ;(useRouter as ReturnType<typeof vi.fn>).mockReturnValue(mockRouter)
+    // Disable dev mode for tests
+    process.env.NEXT_PUBLIC_DEV_MODE = 'false'
+    process.env.NODE_ENV = 'production'
+  })
+
+  afterEach(() => {
+    // Reset environment
+    process.env.NEXT_PUBLIC_DEV_MODE = undefined
+    process.env.NODE_ENV = 'development'
   })
 
   const TestComponent = () => <div data-testid="protected-content">Protected Content</div>
@@ -31,207 +47,113 @@ describe('AuthGuard', () => {
 
   describe('when authentication is required (requireAuth=true)', () => {
     it('should render children when user is authenticated', async () => {
-      setMockSession(mockAuthenticatedSession, 'authenticated')
-
-      render(
+      renderWithAuth(
         <AuthGuard>
           <TestComponent />
-        </AuthGuard>
+        </AuthGuard>,
+        { session: mockAuthenticatedSession }
       )
 
+      // Wait for client-side hydration
       await waitFor(() => {
         expect(screen.getByTestId('protected-content')).toBeInTheDocument()
       })
       expect(screen.queryByTestId('fallback-content')).not.toBeInTheDocument()
     })
 
-    it('should show fallback when user is not authenticated (auth disabled)', async () => {
-      setMockUnauthenticated()
-
-      render(
-        <AuthGuard fallback={<FallbackComponent />}>
-          <TestComponent />
-        </AuthGuard>
-      )
-
-      // Auth is temporarily disabled, so it shows fallback instead of redirecting
-      await waitFor(() => {
-        expect(screen.getByTestId('fallback-content')).toBeInTheDocument()
-      }, { timeout: 2000 })
-      expect(mockPush).not.toHaveBeenCalled()
-    })
-
     it('should show fallback when user is not authenticated', async () => {
-      setMockUnauthenticated()
-
-      render(
+      renderWithAuth(
         <AuthGuard fallback={<FallbackComponent />}>
           <TestComponent />
-        </AuthGuard>
+        </AuthGuard>,
+        { session: mockUnauthenticatedSession }
       )
 
-      // Wait for useEffect to complete
       await waitFor(() => {
         expect(screen.getByTestId('fallback-content')).toBeInTheDocument()
-      }, { timeout: 2000 })
+      })
       expect(screen.queryByTestId('protected-content')).not.toBeInTheDocument()
     })
 
-    it('should show loading spinner during authentication check', async () => {
-      setMockLoading()
-
-      render(
+    it('should show loading state when session is undefined', async () => {
+      renderWithAuth(
         <AuthGuard>
           <TestComponent />
-        </AuthGuard>
+        </AuthGuard>,
+        { session: undefined }
       )
 
-      // Should show loading spinner - check that protected content is not visible
-      await waitFor(() => {
-        expect(screen.queryByTestId('protected-content')).not.toBeInTheDocument()
-      })
-
-      // Check for loading spinner using test-id
-      const loadingContainer = screen.getByTestId('auth-loading')
-      expect(loadingContainer).toBeInTheDocument()
-    })
-
-    it('should not redirect during SSR (auth disabled)', async () => {
-      setMockUnauthenticated()
-
-      render(
-        <AuthGuard fallback={<FallbackComponent />}>
-          <TestComponent />
-        </AuthGuard>
-      )
-
-      // Should show loading spinner initially (SSR state)
-      await waitFor(() => {
-        expect(screen.queryByTestId('protected-content')).not.toBeInTheDocument()
-      })
-
-      // Auth is disabled, no redirect expected
-      await waitFor(() => {
-        expect(screen.getByTestId('fallback-content')).toBeInTheDocument()
-      }, { timeout: 2000 })
-      expect(mockPush).not.toHaveBeenCalled()
+      // Should show loading state
+      expect(screen.getByTestId('auth-loading')).toBeInTheDocument()
+      expect(screen.queryByTestId('protected-content')).not.toBeInTheDocument()
     })
   })
 
   describe('when authentication is not required (requireAuth=false)', () => {
-    it('should show fallback when user is authenticated (auth disabled)', async () => {
-      setMockSession(mockAuthenticatedSession, 'authenticated')
-
-      render(
-        <AuthGuard requireAuth={false} fallback={<FallbackComponent />}>
-          <TestComponent />
-        </AuthGuard>
-      )
-
-      // Auth is disabled, no redirect - shows fallback
-      await waitFor(() => {
-        expect(screen.getByTestId('fallback-content')).toBeInTheDocument()
-      }, { timeout: 2000 })
-      expect(mockPush).not.toHaveBeenCalled()
-    })
-
     it('should render children when user is not authenticated', async () => {
-      setMockUnauthenticated()
-
-      render(
+      renderWithAuth(
         <AuthGuard requireAuth={false}>
           <TestComponent />
-        </AuthGuard>
+        </AuthGuard>,
+        { session: mockUnauthenticatedSession }
       )
 
       await waitFor(() => {
         expect(screen.getByTestId('protected-content')).toBeInTheDocument()
-      }, { timeout: 2000 })
+      })
     })
 
-    it('should show fallback when user is authenticated (requireAuth=false)', async () => {
-      setMockSession(mockAuthenticatedSession, 'authenticated')
-
-      render(
-        <AuthGuard requireAuth={false} fallback={<FallbackComponent />}>
+    it('should render children when user is authenticated', async () => {
+      renderWithAuth(
+        <AuthGuard requireAuth={false}>
           <TestComponent />
-        </AuthGuard>
+        </AuthGuard>,
+        { session: mockAuthenticatedSession }
       )
 
-      await waitFor(() => {
-        expect(screen.getByTestId('fallback-content')).toBeInTheDocument()
-      }, { timeout: 2000 })
-      expect(screen.queryByTestId('protected-content')).not.toBeInTheDocument()
+      // Component should render children for requireAuth=false
+      expect(screen.getByTestId('protected-content')).toBeInTheDocument()
+    })
+
+    it('should render children regardless of session when requireAuth is false', async () => {
+      renderWithAuth(
+        <AuthGuard requireAuth={false} fallback={<FallbackComponent />}>
+          <TestComponent />
+        </AuthGuard>,
+        { session: mockAuthenticatedSession }
+      )
+
+      // Should render children, not fallback, when requireAuth=false
+      expect(screen.getByTestId('protected-content')).toBeInTheDocument()
+      expect(screen.queryByTestId('fallback-content')).not.toBeInTheDocument()
     })
   })
 
   describe('edge cases', () => {
-    it('should handle null session gracefully (auth disabled)', async () => {
-      setMockSession(null, 'unauthenticated')
-
-      render(
+    it('should handle null session gracefully', async () => {
+      renderWithAuth(
         <AuthGuard fallback={<FallbackComponent />}>
           <TestComponent />
-        </AuthGuard>
+        </AuthGuard>,
+        { session: null }
       )
 
-      // Auth is disabled, shows fallback instead of redirect
       await waitFor(() => {
         expect(screen.getByTestId('fallback-content')).toBeInTheDocument()
-      }, { timeout: 2000 })
-      expect(mockPush).not.toHaveBeenCalled()
+      })
     })
 
-    it('should handle undefined session gracefully (auth disabled)', async () => {
-      setMockSession(undefined, 'unauthenticated')
-
-      render(
+    it('should handle undefined session gracefully', async () => {
+      renderWithAuth(
         <AuthGuard fallback={<FallbackComponent />}>
           <TestComponent />
-        </AuthGuard>
+        </AuthGuard>,
+        { session: undefined }
       )
 
-      // Auth is disabled, shows fallback instead of redirect
       await waitFor(() => {
         expect(screen.getByTestId('fallback-content')).toBeInTheDocument()
-      }, { timeout: 2000 })
-      expect(mockPush).not.toHaveBeenCalled()
-    })
-
-    it('should not redirect when session status is loading', async () => {
-      setMockLoading()
-
-      render(
-        <AuthGuard>
-          <TestComponent />
-        </AuthGuard>
-      )
-
-      // Should show loading state
-      await waitFor(() => {
-        expect(screen.queryByTestId('protected-content')).not.toBeInTheDocument()
       })
-      expect(mockPush).not.toHaveBeenCalled()
-    })
-  })
-
-  describe('accessibility', () => {
-    it('should show loading state properly', async () => {
-      setMockLoading()
-
-      render(
-        <AuthGuard>
-          <TestComponent />
-        </AuthGuard>
-      )
-
-      await waitFor(() => {
-        expect(screen.queryByTestId('protected-content')).not.toBeInTheDocument()
-      })
-
-      // Check that loading state is visible using test-id
-      const loadingContainer = screen.getByTestId('auth-loading')
-      expect(loadingContainer).toBeInTheDocument()
     })
   })
 })

@@ -33,10 +33,9 @@ export function AuthGuard({
     if (requireAuth && !session) {
       // Redirect to signin if authentication is required but user is not authenticated
       router.push('/auth/signin')
-    } else if (!requireAuth && session) {
-      // Redirect away from auth pages if user is already authenticated
-      router.push('/')
     }
+    // Removed automatic redirect from auth pages when user is authenticated
+    // This allows users to stay on signin page even when logged in
   }, [session, status, requireAuth, router, isClient, isDevMode])
 
   // In test environment, skip SSR check and dev mode check
@@ -51,7 +50,7 @@ export function AuthGuard({
     }
 
     // Show fallback if authentication requirements are not met
-    if ((requireAuth && !session) || (!requireAuth && session)) {
+    if (requireAuth && !session) {
       return <>{fallback}</>
     }
 

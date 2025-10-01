@@ -41,26 +41,8 @@ export default function SignInPage() {
     }
   }
 
-  const handleOAuthSignIn = async (provider: string) => {
-    try {
-      setIsLoading(true)
-      const result = await signIn(provider, {
-        callbackUrl: '/',
-        redirect: false
-      })
-
-      if (result?.error) {
-        console.error(`${provider} sign in error:`, result.error)
-        setError(`${provider} Anmeldung fehlgeschlagen. Überprüfe die OAuth-Konfiguration.`)
-      } else if (result?.url) {
-        window.location.href = result.url
-      }
-    } catch (error) {
-      console.error(`${provider} sign in error:`, error)
-      setError(`Unerwarteter Fehler bei der ${provider} Anmeldung.`)
-    } finally {
-      setIsLoading(false)
-    }
+  const handleOAuthSignIn = (provider: string) => {
+    signIn(provider, { callbackUrl: '/dashboard' })
   }
 
   return (

@@ -124,7 +124,7 @@ export default function SignInPage() {
 
              <p className="text-xs text-muted-foreground text-center">
                Test emails: admin@example.com, user@example.com, premium@example.com, moderator@example.com
-               Für OAuth: Konfigurieren Sie GITHUB_ID und GITHUB_SECRET in .env.local
+               Für OAuth: Konfigurieren Sie GITHUB_ID/GITHUB_SECRET und GOOGLE_CLIENT_ID/GOOGLE_CLIENT_SECRET in .env.local
              </p>
           </CardContent>
         </Card>

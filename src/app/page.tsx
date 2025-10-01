@@ -22,13 +22,24 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu"
-import { UserButton } from "@/components/auth/UserButton"
+import {
+  NavigationMenu,
+  NavigationMenuList,
+  NavigationMenuItem,
+  NavigationMenuLink,
+} from "@/components/ui/navigation-menu"
+
 import dynamic from 'next/dynamic'
 import { ClerkProvider } from "@clerk/nextjs"
 import { SessionProvider } from "next-auth/react"
 import { Settings, LogOut, Download, Copy, Check } from 'lucide-react'
 import { useClipboard } from '@/hooks/use-clipboard'
 import { ThemeToggle } from '@/components/custom/theme-toggle'
+import Link from 'next/link'
+
+const ClerkUserButton = dynamic(() => import('@/components/auth/ClerkUserButton'), { ssr: false })
+const NextAuthUserButton = dynamic(() => import('@/components/auth/NextAuthUserButton'), { ssr: false })
+const InteractiveDemo = dynamic(() => import('@/components/InteractiveDemo'), { ssr: false })
 
 // Conditional Auth provider for development
 function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -55,11 +66,22 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-// Dynamically import Clerk components to avoid SSR issues
-const AuthComponents = dynamic(() => import('@/components/auth/AuthDemo'), {
+// Dynamically import auth components based on configuration to avoid SSR issues
+const AuthComponents = dynamic(() => {
+  const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+  const isValidClerkKey = publishableKey &&
+    publishableKey.startsWith('pk_live_') &&
+    publishableKey.length > 20
+
+  return isValidClerkKey
+    ? import('@/components/auth/ClerkAuthDemo')
+    : import('@/components/auth/NextAuthDemo')
+}, {
   ssr: false,
   loading: () => <div className="text-muted-foreground">Authentication wird geladen...</div>
 })
+
+
 
 // Code Snippet Component with Copy functionality
 function CodeSnippet({ code, language = 'tsx' }: { code: string; language?: string }) {
@@ -83,6 +105,10 @@ function CodeSnippet({ code, language = 'tsx' }: { code: string; language?: stri
 }
 
 function HomeContent() {
+  const isValidClerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY &&
+    process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.startsWith('pk_live_') &&
+    process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.length > 20
+
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [dropdownOpen, setDropdownOpen] = useState(false)
@@ -124,9 +150,43 @@ function HomeContent() {
       <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div>
+            <div className="flex flex-col items-start gap-2">
               <h1 className="text-3xl font-bold">OK9 SaaS Starter Kit</h1>
               <p className="text-muted-foreground">UI Components Showcase</p>
+              <NavigationMenu>
+                <NavigationMenuList>
+                  <NavigationMenuItem>
+                    <NavigationMenuLink asChild>
+                      <Link href="/">Home</Link>
+                    </NavigationMenuLink>
+                  </NavigationMenuItem>
+                  <NavigationMenuItem>
+                    <NavigationMenuLink asChild>
+                      <Link href="/dashboard">Dashboard</Link>
+                    </NavigationMenuLink>
+                  </NavigationMenuItem>
+                  <NavigationMenuItem>
+                    <NavigationMenuLink asChild>
+                      <Link href="/dashboard/billing">Billing</Link>
+                    </NavigationMenuLink>
+                  </NavigationMenuItem>
+                  <NavigationMenuItem>
+                    <NavigationMenuLink asChild>
+                      <Link href="/dashboard/settings">Settings</Link>
+                    </NavigationMenuLink>
+                  </NavigationMenuItem>
+                  <NavigationMenuItem>
+                    <NavigationMenuLink asChild>
+                      <Link href="/dashboard/users">Users</Link>
+                    </NavigationMenuLink>
+                  </NavigationMenuItem>
+                  <NavigationMenuItem>
+                    <NavigationMenuLink asChild>
+                      <Link href="/demo">Demo</Link>
+                    </NavigationMenuLink>
+                  </NavigationMenuItem>
+                </NavigationMenuList>
+              </NavigationMenu>
             </div>
 
             {/* Search and Filter */}
@@ -149,8 +209,8 @@ function HomeContent() {
                    ))}
                  </SelectContent>
                </Select>
-               <ThemeToggle />
-               <UserButton />
+                <ThemeToggle />
+                {isValidClerkKey ? <ClerkUserButton /> : <NextAuthUserButton />}
              </div>
           </div>
         </div>
@@ -773,137 +833,7 @@ function HomeContent() {
           </div>
         </section>
 
-        {/* Interactive Demo Section */}
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-6">Interaktive Demo</h2>
-          <Card>
-            <CardHeader>
-              <CardTitle>Benutzerprofil Editor</CardTitle>
-              <CardDescription>Eine praktische Demo, die mehrere Komponenten kombiniert</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* User Info */}
-                <div className="space-y-6">
-                  <div className="flex items-center gap-4">
-                    <Avatar className="h-16 w-16">
-                      <AvatarImage src="/avatars/demo.png" alt="Demo User" />
-                      <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white">
-                        DU
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <h3 className="font-semibold">Demo Benutzer</h3>
-                      <p className="text-sm text-muted-foreground">Software Engineer</p>
-                       <DropdownMenu>
-                         <DropdownMenuTrigger asChild>
-                           <Button variant="outline" size="sm" className="mt-2">
-                             Profil bearbeiten
-                           </Button>
-                         </DropdownMenuTrigger>
-                         <DropdownMenuContent>
-                           <DropdownMenuItem>Foto ändern</DropdownMenuItem>
-                           <DropdownMenuItem>Profilinfo bearbeiten</DropdownMenuItem>
-                           <DropdownMenuSeparator />
-                           <DropdownMenuItem>Privatsphäre</DropdownMenuItem>
-                         </DropdownMenuContent>
-                       </DropdownMenu>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="demo-name">Name</Label>
-                      <Input id="demo-name" placeholder="Vollständiger Name" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="demo-email">Email</Label>
-                      <Input id="demo-email" type="email" placeholder="email@beispiel.de" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Settings */}
-                <div className="space-y-6">
-                  <h4 className="font-medium">Einstellungen</h4>
-
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="demo-theme">Theme</Label>
-                      <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Theme wählen" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="light">Hell</SelectItem>
-                          <SelectItem value="dark">Dunkel</SelectItem>
-                          <SelectItem value="system">System</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="demo-language">Sprache</Label>
-                      <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sprache wählen" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="de">Deutsch</SelectItem>
-                          <SelectItem value="en">English</SelectItem>
-                          <SelectItem value="fr">Français</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                     <div className="flex items-center justify-between">
-                       <Label htmlFor="demo-notifications">Benachrichtigungen</Label>
-                       <input
-                         type="checkbox"
-                         id="demo-notifications"
-                         checked={checkboxItems.notifications}
-                         onChange={(e) => setCheckboxItems({...checkboxItems, notifications: e.target.checked})}
-                         className="rounded"
-                       />
-                     </div>
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="space-y-6">
-                  <h4 className="font-medium">Aktionen</h4>
-
-                  <div className="space-y-3">
-                    <Button className="w-full" variant="outline">
-                      <Download className="mr-2 h-4 w-4" />
-                      Daten exportieren
-                    </Button>
-
-                    <Button className="w-full" variant="outline">
-                      <Settings className="mr-2 h-4 w-4" />
-                      Erweiterte Einstellungen
-                    </Button>
-
-                    <div className="pt-4 border-t">
-                      <Button variant="destructive" className="w-full">
-                        <LogOut className="mr-2 h-4 w-4" />
-                        Konto löschen
-                      </Button>
-                      <p className="text-xs text-muted-foreground mt-2 text-center">
-                        Diese Aktion kann nicht rückgängig gemacht werden
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex gap-3 justify-end mt-8 pt-6 border-t">
-                <Button variant="outline">Abbrechen</Button>
-                <Button>Änderungen speichern</Button>
-              </div>
-            </CardContent>
-          </Card>
-        </section>
+        <InteractiveDemo />
 
         {/* Authentication Components */}
         <section className="mb-12">
@@ -942,10 +872,20 @@ function HomeContent() {
               <h3 className="font-semibold">OK9 SaaS Starter Kit</h3>
               <p className="text-sm text-muted-foreground">Modulares SaaS Starter Kit</p>
             </div>
-            <div className="flex gap-4">
-              <Button variant="outline" size="sm">Dokumentation</Button>
-              <Button variant="outline" size="sm">GitHub</Button>
-            </div>
+      <div className="flex gap-4">
+        <Button asChild variant="outline" size="sm">
+          <a href="https://github.com/bytefer/awesome-shadcn-ui" target="_blank" rel="noopener noreferrer">Awesome Shadcn</a>
+        </Button>
+        <Button asChild variant="outline" size="sm">
+          <a href="https://ui.shadcn.com/docs/components" target="_blank" rel="noopener noreferrer">Shadcn</a>
+        </Button>
+        <Button asChild variant="outline" size="sm">
+          <a href="https://tailwindcss.com/plus/ui-blocks?ref=sidebar" target="_blank" rel="noopener noreferrer">TailwindCSS</a>
+        </Button>
+        <Button asChild variant="outline" size="sm">
+          <a href="https://opencode.ai" target="_blank" rel="noopener noreferrer">Opencode</a>
+        </Button>
+      </div>
           </div>
         </div>
       </footer>

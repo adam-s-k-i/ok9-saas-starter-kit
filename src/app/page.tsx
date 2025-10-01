@@ -7,27 +7,28 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
-// DropdownMenu components temporarily disabled for debugging
-// import {
-//   DropdownMenu,
-//   DropdownMenuContent,
-//   DropdownMenuGroup,
-//   DropdownMenuItem,
-//   DropdownMenuLabel,
-//   DropdownMenuSeparator,
-//   DropdownMenuTrigger,
-//   DropdownMenuCheckboxItem,
-//   DropdownMenuRadioGroup,
-//   DropdownMenuRadioItem,
-//   DropdownMenuSub,
-//   DropdownMenuSubContent,
-//   DropdownMenuSubTrigger,
-// } from "@/components/ui/dropdown-menu"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  DropdownMenuCheckboxItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+} from "@/components/ui/dropdown-menu"
 import { UserButton } from "@/components/auth/UserButton"
 import dynamic from 'next/dynamic'
 import { ClerkProvider } from "@clerk/nextjs"
 import { SessionProvider } from "next-auth/react"
-import { Settings, LogOut, Download } from 'lucide-react'
+import { Settings, LogOut, Download, Copy, Check } from 'lucide-react'
+import { useClipboard } from '@/hooks/use-clipboard'
+import { ThemeToggle } from '@/components/custom/theme-toggle'
 
 // Conditional Auth provider for development
 function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -60,17 +61,37 @@ const AuthComponents = dynamic(() => import('@/components/auth/AuthDemo'), {
   loading: () => <div className="text-muted-foreground">Authentication wird geladen...</div>
 })
 
+// Code Snippet Component with Copy functionality
+function CodeSnippet({ code, language = 'tsx' }: { code: string; language?: string }) {
+  const { copyToClipboard, copied } = useClipboard()
+
+  return (
+    <div className="relative">
+      <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-sm">
+        <code className={`language-${language}`}>{code}</code>
+      </pre>
+      <Button
+        size="sm"
+        variant="ghost"
+        className="absolute top-2 right-2 h-8 w-8 p-0"
+        onClick={() => copyToClipboard(code)}
+      >
+        {copied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
+      </Button>
+    </div>
+  )
+}
+
 function HomeContent() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
-  // DropdownMenu state temporarily disabled for debugging
-  // const [dropdownOpen, setDropdownOpen] = useState(false)
-  // const [checkboxItems, setCheckboxItems] = useState({
-  //   status: true,
-  //   comments: false,
-  //   notifications: true
-  // })
-  // const [radioValue, setRadioValue] = useState('default')
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [checkboxItems, setCheckboxItems] = useState({
+    status: true,
+    comments: false,
+    notifications: true
+  })
+  const [radioValue, setRadioValue] = useState('default')
 
   const componentCategories = [
     { id: 'all', name: 'Alle Komponenten' },
@@ -81,6 +102,13 @@ function HomeContent() {
     { id: 'avatars', name: 'Avatare' },
     { id: 'dropdowns', name: 'Dropdown-Menüs' }
   ]
+
+  // Filter components based on search and category
+  const filteredComponents = componentCategories.filter(category => {
+    if (selectedCategory !== 'all' && category.id !== selectedCategory) return false
+    if (searchTerm && !category.name.toLowerCase().includes(searchTerm.toLowerCase())) return false
+    return true
+  })
 
   const tailwindUtilities = [
     { name: 'Flexbox', example: 'flex justify-center items-center', description: 'Flexbox Layout Utilities' },
@@ -109,20 +137,21 @@ function HomeContent() {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full md:w-64"
               />
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="w-full md:w-48">
-                  <SelectValue placeholder="Kategorie wählen" />
-                </SelectTrigger>
-                <SelectContent>
-                  {componentCategories.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
-                      {category.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <UserButton />
-            </div>
+               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                 <SelectTrigger className="w-full md:w-48">
+                   <SelectValue placeholder="Kategorie wählen" />
+                 </SelectTrigger>
+                 <SelectContent>
+                   {filteredComponents.map((category) => (
+                     <SelectItem key={category.id} value={category.id}>
+                       {category.name}
+                     </SelectItem>
+                   ))}
+                 </SelectContent>
+               </Select>
+               <ThemeToggle />
+               <UserButton />
+             </div>
           </div>
         </div>
       </header>
@@ -164,7 +193,7 @@ function HomeContent() {
             {/* Button Variants */}
             <div className="mb-8">
               <h4 className="text-lg font-medium mb-4">Varianten</h4>
-              <div className="flex flex-wrap gap-4">
+              <div className="flex flex-wrap gap-4 mb-4">
                 <Button variant="default">Primary</Button>
                 <Button variant="secondary">Secondary</Button>
                 <Button variant="outline">Outline</Button>
@@ -172,26 +201,38 @@ function HomeContent() {
                 <Button variant="link">Link</Button>
                 <Button variant="destructive">Destructive</Button>
               </div>
+              <CodeSnippet code={`<Button variant="default">Primary</Button>
+<Button variant="secondary">Secondary</Button>
+<Button variant="outline">Outline</Button>
+<Button variant="ghost">Ghost</Button>
+<Button variant="link">Link</Button>
+<Button variant="destructive">Destructive</Button>`} />
             </div>
 
             {/* Button Sizes */}
             <div className="mb-8">
               <h4 className="text-lg font-medium mb-4">Größen</h4>
-              <div className="flex flex-wrap items-center gap-4">
+              <div className="flex flex-wrap items-center gap-4 mb-4">
                 <Button size="sm">Small</Button>
                 <Button size="default">Default</Button>
                 <Button size="lg">Large</Button>
                 <Button size="icon">🔍</Button>
               </div>
+              <CodeSnippet code={`<Button size="sm">Small</Button>
+<Button size="default">Default</Button>
+<Button size="lg">Large</Button>
+<Button size="icon">🔍</Button>`} />
             </div>
 
             {/* Button States */}
             <div>
               <h4 className="text-lg font-medium mb-4">Zustände</h4>
-              <div className="flex flex-wrap gap-4">
+              <div className="flex flex-wrap gap-4 mb-4">
                 <Button disabled>Disabled</Button>
                 <Button disabled className="opacity-50">Loading</Button>
               </div>
+              <CodeSnippet code={`<Button disabled>Disabled</Button>
+<Button disabled className="opacity-50">Loading</Button>`} />
             </div>
           </div>
 
@@ -402,121 +443,121 @@ function HomeContent() {
             </div>
           </div>
 
-          {/* Dropdown Menus - Temporarily disabled for debugging */}
-          {/* <div className="mb-12">
-            <h3 className="text-xl font-semibold mb-6">Dropdown-Menüs</h3>
+           {/* Dropdown Menus */}
+           <div className="mb-12">
+             <h3 className="text-xl font-semibold mb-6">Dropdown-Menüs</h3>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Standard Dropdown</CardTitle>
-                  <CardDescription>Einfaches Dropdown-Menü mit verschiedenen Items</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline">Dropdown öffnen</Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56">
-                      <DropdownMenuLabel>Mein Konto</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuGroup>
-                        <DropdownMenuItem>
-                          <User className="mr-2 h-4 w-4" />
-                          <span>Profil</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Settings className="mr-2 h-4 w-4" />
-                          <span>Einstellungen</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Users className="mr-2 h-4 w-4" />
-                          <span>Team verwalten</span>
-                        </DropdownMenuItem>
-                      </DropdownMenuGroup>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem>
-                        <LogOut className="mr-2 h-4 w-4" />
-                        <span>Abmelden</span>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </CardContent>
-              </Card>
+             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+               <Card>
+                 <CardHeader>
+                   <CardTitle>Standard Dropdown</CardTitle>
+                   <CardDescription>Einfaches Dropdown-Menü mit verschiedenen Items</CardDescription>
+                 </CardHeader>
+                 <CardContent>
+                   <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
+                     <DropdownMenuTrigger asChild>
+                       <Button variant="outline">Dropdown öffnen</Button>
+                     </DropdownMenuTrigger>
+                     <DropdownMenuContent className="w-56">
+                       <DropdownMenuLabel>Mein Konto</DropdownMenuLabel>
+                       <DropdownMenuSeparator />
+                       <DropdownMenuGroup>
+                         <DropdownMenuItem>
+                           <Settings className="mr-2 h-4 w-4" />
+                           <span>Profil</span>
+                         </DropdownMenuItem>
+                         <DropdownMenuItem>
+                           <Settings className="mr-2 h-4 w-4" />
+                           <span>Einstellungen</span>
+                         </DropdownMenuItem>
+                         <DropdownMenuItem>
+                           <Settings className="mr-2 h-4 w-4" />
+                           <span>Team verwalten</span>
+                         </DropdownMenuItem>
+                       </DropdownMenuGroup>
+                       <DropdownMenuSeparator />
+                       <DropdownMenuItem>
+                         <LogOut className="mr-2 h-4 w-4" />
+                         <span>Abmelden</span>
+                       </DropdownMenuItem>
+                     </DropdownMenuContent>
+                   </DropdownMenu>
+                 </CardContent>
+               </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Erweitertes Dropdown</CardTitle>
-                  <CardDescription>Mit Checkboxen, Radio-Buttons und Sub-Menüs</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline">Erweitertes Menü</Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56">
-                      <DropdownMenuLabel>Einstellungen</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
+               <Card>
+                 <CardHeader>
+                   <CardTitle>Erweitertes Dropdown</CardTitle>
+                   <CardDescription>Mit Checkboxen, Radio-Buttons und Sub-Menüs</CardDescription>
+                 </CardHeader>
+                 <CardContent>
+                   <DropdownMenu>
+                     <DropdownMenuTrigger asChild>
+                       <Button variant="outline">Erweitertes Menü</Button>
+                     </DropdownMenuTrigger>
+                     <DropdownMenuContent className="w-56">
+                       <DropdownMenuLabel>Einstellungen</DropdownMenuLabel>
+                       <DropdownMenuSeparator />
 
-                      <DropdownMenuGroup>
-                        <DropdownMenuCheckboxItem
-                          checked={checkboxItems.status}
-                          onCheckedChange={(checked) => setCheckboxItems({...checkboxItems, status: !!checked})}
-                        >
-                          Online-Status
-                        </DropdownMenuCheckboxItem>
-                        <DropdownMenuCheckboxItem
-                          checked={checkboxItems.comments}
-                          onCheckedChange={(checked) => setCheckboxItems({...checkboxItems, comments: !!checked})}
-                        >
-                          Kommentare
-                        </DropdownMenuCheckboxItem>
-                        <DropdownMenuCheckboxItem
-                          checked={checkboxItems.notifications}
-                          onCheckedChange={(checked) => setCheckboxItems({...checkboxItems, notifications: !!checked})}
-                        >
-                          Benachrichtigungen
-                        </DropdownMenuCheckboxItem>
-                      </DropdownMenuGroup>
+                       <DropdownMenuGroup>
+                         <DropdownMenuCheckboxItem
+                           checked={checkboxItems.status}
+                           onCheckedChange={(checked) => setCheckboxItems({...checkboxItems, status: !!checked})}
+                         >
+                           Online-Status
+                         </DropdownMenuCheckboxItem>
+                         <DropdownMenuCheckboxItem
+                           checked={checkboxItems.comments}
+                           onCheckedChange={(checked) => setCheckboxItems({...checkboxItems, comments: !!checked})}
+                         >
+                           Kommentare
+                         </DropdownMenuCheckboxItem>
+                         <DropdownMenuCheckboxItem
+                           checked={checkboxItems.notifications}
+                           onCheckedChange={(checked) => setCheckboxItems({...checkboxItems, notifications: !!checked})}
+                         >
+                           Benachrichtigungen
+                         </DropdownMenuCheckboxItem>
+                       </DropdownMenuGroup>
 
-                      <DropdownMenuSeparator />
+                       <DropdownMenuSeparator />
 
-                      <DropdownMenuRadioGroup value={radioValue} onValueChange={setRadioValue}>
-                        <DropdownMenuLabel>Theme</DropdownMenuLabel>
-                        <DropdownMenuRadioItem value="light">Hell</DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem value="dark">Dunkel</DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem value="system">System</DropdownMenuRadioItem>
-                      </DropdownMenuRadioGroup>
+                       <DropdownMenuRadioGroup value={radioValue} onValueChange={setRadioValue}>
+                         <DropdownMenuLabel>Theme</DropdownMenuLabel>
+                         <DropdownMenuRadioItem value="light">Hell</DropdownMenuRadioItem>
+                         <DropdownMenuRadioItem value="dark">Dunkel</DropdownMenuRadioItem>
+                         <DropdownMenuRadioItem value="system">System</DropdownMenuRadioItem>
+                       </DropdownMenuRadioGroup>
 
-                      <DropdownMenuSeparator />
+                       <DropdownMenuSeparator />
 
-                      <DropdownMenuSub>
-                        <DropdownMenuSubTrigger>
-                          <Settings className="mr-2 h-4 w-4" />
-                          <span>Weitere Optionen</span>
-                        </DropdownMenuSubTrigger>
-                        <DropdownMenuSubContent>
-                          <DropdownMenuItem>
-                            <Download className="mr-2 h-4 w-4" />
-                            <span>Import</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Download className="mr-2 h-4 w-4" />
-                            <span>Export</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem>
-                            <HelpCircle className="mr-2 h-4 w-4" />
-                            <span>Hilfe</span>
-                          </DropdownMenuItem>
-                        </DropdownMenuSubContent>
-                      </DropdownMenuSub>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </CardContent>
-              </Card>
-            </div>
-          </div> */}
+                       <DropdownMenuSub>
+                         <DropdownMenuSubTrigger>
+                           <Settings className="mr-2 h-4 w-4" />
+                           <span>Weitere Optionen</span>
+                         </DropdownMenuSubTrigger>
+                         <DropdownMenuSubContent>
+                           <DropdownMenuItem>
+                             <Download className="mr-2 h-4 w-4" />
+                             <span>Import</span>
+                           </DropdownMenuItem>
+                           <DropdownMenuItem>
+                             <Download className="mr-2 h-4 w-4" />
+                             <span>Export</span>
+                           </DropdownMenuItem>
+                           <DropdownMenuSeparator />
+                           <DropdownMenuItem>
+                             <Settings className="mr-2 h-4 w-4" />
+                             <span>Hilfe</span>
+                           </DropdownMenuItem>
+                         </DropdownMenuSubContent>
+                       </DropdownMenuSub>
+                     </DropdownMenuContent>
+                   </DropdownMenu>
+                 </CardContent>
+               </Card>
+             </div>
+           </div>
 
           {/* Select Component */}
           <div className="mb-12">
@@ -684,28 +725,28 @@ function HomeContent() {
               </CardContent>
             </Card>
 
-            {/* Dropdown Menu Component - Temporarily disabled for debugging */}
-            {/* <Card className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                  Dropdown Menu
-                </CardTitle>
-                <CardDescription>Kontextmenüs und Auswahloptionen</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm">Menü öffnen</Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuItem>Option 1</DropdownMenuItem>
-                    <DropdownMenuItem>Option 2</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                <p className="text-sm text-muted-foreground mt-2">Checkboxen, Radio, Sub-Menüs</p>
-              </CardContent>
-            </Card> */}
+             {/* Dropdown Menu Component */}
+             <Card className="hover:shadow-lg transition-shadow">
+               <CardHeader>
+                 <CardTitle className="flex items-center gap-2">
+                   <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                   Dropdown Menu
+                 </CardTitle>
+                 <CardDescription>Kontextmenüs und Auswahloptionen</CardDescription>
+               </CardHeader>
+               <CardContent>
+                 <DropdownMenu>
+                   <DropdownMenuTrigger asChild>
+                     <Button variant="outline" size="sm">Menü öffnen</Button>
+                   </DropdownMenuTrigger>
+                   <DropdownMenuContent>
+                     <DropdownMenuItem>Option 1</DropdownMenuItem>
+                     <DropdownMenuItem>Option 2</DropdownMenuItem>
+                   </DropdownMenuContent>
+                 </DropdownMenu>
+                 <p className="text-sm text-muted-foreground mt-2">Checkboxen, Radio, Sub-Menüs</p>
+               </CardContent>
+             </Card>
 
             {/* Select Component */}
             <Card className="hover:shadow-lg transition-shadow">
@@ -754,19 +795,19 @@ function HomeContent() {
                     <div>
                       <h3 className="font-semibold">Demo Benutzer</h3>
                       <p className="text-sm text-muted-foreground">Software Engineer</p>
-                      {/* <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="outline" size="sm" className="mt-2">
-                            Profil bearbeiten
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                          <DropdownMenuItem>Foto ändern</DropdownMenuItem>
-                          <DropdownMenuItem>Profilinfo bearbeiten</DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem>Privatsphäre</DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu> */}
+                       <DropdownMenu>
+                         <DropdownMenuTrigger asChild>
+                           <Button variant="outline" size="sm" className="mt-2">
+                             Profil bearbeiten
+                           </Button>
+                         </DropdownMenuTrigger>
+                         <DropdownMenuContent>
+                           <DropdownMenuItem>Foto ändern</DropdownMenuItem>
+                           <DropdownMenuItem>Profilinfo bearbeiten</DropdownMenuItem>
+                           <DropdownMenuSeparator />
+                           <DropdownMenuItem>Privatsphäre</DropdownMenuItem>
+                         </DropdownMenuContent>
+                       </DropdownMenu>
                     </div>
                   </div>
 
@@ -815,15 +856,16 @@ function HomeContent() {
                       </Select>
                     </div>
 
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="demo-notifications">Benachrichtigungen</Label>
-                      {/* <DropdownMenuCheckboxItem
-                        checked={checkboxItems.notifications}
-                        onCheckedChange={(checked) => setCheckboxItems({...checkboxItems, notifications: !!checked})}
-                      >
-                        Aktiviert
-                      </DropdownMenuCheckboxItem> */}
-                    </div>
+                     <div className="flex items-center justify-between">
+                       <Label htmlFor="demo-notifications">Benachrichtigungen</Label>
+                       <input
+                         type="checkbox"
+                         id="demo-notifications"
+                         checked={checkboxItems.notifications}
+                         onChange={(e) => setCheckboxItems({...checkboxItems, notifications: e.target.checked})}
+                         className="rounded"
+                       />
+                     </div>
                   </div>
                 </div>
 

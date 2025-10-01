@@ -3,7 +3,7 @@
 > **Version:** 1.2.0
 > **Letzte Aktualisierung:** 2024-09-29
 > **Status:** Production Ready
-> **Autor:** Architecture Agent & Team
+> **Autor:** Subagenten-Team (siehe [/agents/](./agents/) für Agenten-Anweisungen)
 
 ### 🔗 Verwandte Dokumentation
 - [Claude Code Configuration](./CLAUDE.md)

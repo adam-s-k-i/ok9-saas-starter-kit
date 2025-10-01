@@ -31,14 +31,28 @@ Ein modulares, hochgradig wartbares SaaS-Starter-Kit für die schnelle Entwicklu
 - **Testing**: Vitest, Playwright
 - **Deployment**: Vercel, Docker, Coolify
 
-### Claude Code Subagenten
-Das Projekt nutzt spezialisierte Claude Code Subagenten für verschiedene Bereiche:
-- **Architecture Agent**: Gesamtsteuerung und Integration
-- **Frontend Agent**: React/Next.js Entwicklung
-- **Backend Agent**: API und Datenbank
-- **DevOps Agent**: Deployment und CI/CD
-- **Testing Agent**: Qualitätssicherung
-- **Documentation Agent**: Dokumentation
+### Subagenten-Architektur
+
+Das OK9 SaaS Starter Kit verwendet eine modulare Subagenten-Architektur für die langfristige Wartbarkeit des Codes. Bei Nutzung eines Agenten werden immer die Anweisungen aus den entsprechenden MD-Dateien im `/agents/` Verzeichnis herangezogen.
+
+#### Verfügbare Agenten
+- **PO Agent**: [Siehe /agents/po-agent.md](./agents/po-agent.md)
+- **Architektur Agent**: [Siehe /agents/architecture-agent.md](./agents/architecture-agent.md)
+- **Frontend Agent**: [Siehe /agents/frontend-agent.md](./agents/frontend-agent.md)
+- **Backend Agent**: [Siehe /agents/backend-agent.md](./agents/backend-agent.md)
+- **DevOps Agent**: [Siehe /agents/devops-agent.md](./agents/devops-agent.md)
+- **Testing Agent**: [Siehe /agents/testing-agent.md](./agents/testing-agent.md)
+- **Documentation Agent**: [Siehe /agents/documentation-agent.md](./agents/documentation-agent.md)
+
+#### Kommunikationsfluss
+1. Benutzer → PO Agent (Anforderung).
+2. PO Agent → Architektur Agent (Delegation).
+3. Architektur Agent → Fachagenten (parallele Ausführung).
+4. Fachagenten → Architektur Agent (Ergebnisse).
+5. Architektur Agent → PO Agent (Integration).
+6. PO Agent → Benutzer (Antwort).
+
+Für detaillierte Anweisungen und Wartbarkeitsstrategien siehe die jeweiligen Agenten-MD-Dateien.
 
 ## 🚀 Quick Start
 
@@ -73,12 +87,152 @@ npm run dev
 
 🎉 **Fertig!** Das Projekt läuft auf http://localhost:3000
 
+## 🛠️ Verfügbare Scripts
+
+```bash
+# Development
+npm run dev              # Development Server starten
+npm run build           # Production Build erstellen
+npm run start           # Production Server starten
+
+# Code Quality
+npm run lint            # ESLint ausführen
+npm run type-check      # TypeScript Typprüfung
+
+# Testing
+npm test                # Alle Tests ausführen
+npm run test:watch      # Tests im Watch-Modus
+npm run test:coverage   # Coverage-Bericht erstellen
+npm run test:ui         # Test UI Interface öffnen
+
+# Database
+npm run db:generate     # Prisma Client generieren
+npm run db:push         # Schema zu Datenbank pushen
+npm run db:seed         # Datenbank mit Seed-Daten füllen
+```
+
+## 📋 Code Style & Projektstruktur
+
+### Code Style
+- **TypeScript**: Strict mode, full type safety, no `any`
+- **Imports**: `@/` alias for src/, no relative paths
+- **Components**: Functional React, PascalCase, destructured props
+- **Functions/Hooks**: camelCase, hooks prefixed `use`
+- **Formatting**: 2-space indent, ESLint auto-fix
+- **Styling**: Tailwind CSS, `cn()` for class merging
+- **Error Handling**: Try/catch, error boundaries
+- **Testing**: Vitest + RTL, co-located `.test.tsx`
+- **Naming**: Descriptive, consistent patterns
+
+### Project Structure
+- `src/app/`: Next.js App Router pages
+- `src/components/`: Reusable UI components
+- `src/lib/`: Utilities and configs
+- `src/hooks/`: Custom React hooks
+- `src/stores/`: Zustand state management
+- `prisma/`: Database schema and seeds
+
+## 🔄 Agenten-Kommunikation
+
+### Workflow Pattern
+```
+User Request → PO Agent → Architecture Agent → Specialized Agent → Architecture Agent → PO Agent → Response
+```
+
+### Kommunikationshierarchie
+```
+┌─────────────────┐
+│    User/Client  │
+└─────────┬───────┘
+          │
+          ▼
+┌─────────────────┐  (einziger User-Kontakt)
+│    PO Agent     │
+└─────────┬───────┘
+          │
+          ▼
+┌─────────────────┐  (technische Koordination)
+│Architecture Agnt│
+└─────────┬───────┘
+          │
+          ▼
+┌─────────────────────────────────────────┐
+│  Specialized Agents (Parallelarbeitung) │
+│  ┌─────────┐ ┌─────────┐ ┌─────────┐    │
+│  │Frontend │ │Backend  │ │DevOps   │    │
+│  └─────────┘ └─────────┘ └─────────┘    │
+│  ┌─────────┐ ┌─────────┐               │
+│  │Testing  │ │  Docs   │               │
+│  └─────────┘ └─────────┘               │
+└─────────────────────────────────────────┘
+```
+
+### Kommunikationsprotokolle
+1. **User Interface**: PO Agent ist einziger direkter User-Kontakt
+2. **Requirements Analysis**: PO Agent analysiert und strukturiert User Requests
+3. **Technical Delegation**: PO Agent delegiert an Architecture Agent
+4. **Task Distribution**: Architecture Agent delegiert an Fachagenten
+5. **Result Aggregation**: Architecture Agent sammelt und integriert Ergebnisse
+6. **Quality Control**: Architecture Agent führt finalen Review durch
+7. **User Communication**: PO Agent übersetzt technische Ergebnisse für User
+
+## 🔧 Entwicklungsworkflows
+
+### Neue Feature-Entwicklung mit PO-Agent
+1. User stellt Anfrage an PO Agent
+2. PO Agent analysiert User-Anforderungen und Business-Logik
+3. PO Agent delegiert technische Analyse an Architecture Agent
+4. Architecture Agent erstellt technische Spezifikation
+5. Architecture Agent delegiert an entsprechende Fachagenten (parallel)
+6. Fachagenten implementieren ihre Bereiche
+7. Architecture Agent koordiniert Integration
+8. Testing Agent validiert Gesamtimplementierung
+9. Architecture Agent meldet Ergebnis an PO Agent
+10. PO Agent kommuniziert Ergebnis an User
+
+### Code-Review Prozess mit PO-Agent
+1. User Request über PO Agent
+2. PO Agent strukturiert Review-Anforderungen
+3. Architecture Agent koordiniert Review-Prozess
+4. Architecture Agent prüft Gesamtarchitektur
+5. Fachagenten prüfen ihre spezifischen Bereiche (parallel)
+6. Testing Agent prüft Testabdeckung und Qualität
+7. DevOps Agent prüft Deployment-Readiness
+8. Architecture Agent aggregiert Review-Ergebnisse
+9. PO Agent präsentiert Ergebnisse an User
+
+### Bug Fixing mit PO-Agent
+1. User meldet Bug an PO Agent
+2. PO Agent klassifiziert und priorisiert Bug
+3. PO Agent delegiert Bug-Analyse an Architecture Agent
+4. Architecture Agent identifiziert Problembereich
+5. Architecture Agent delegiert Fix an zuständigen Fachagenten
+6. Fachagent implementiert Fix
+7. Testing Agent validiert Fix und führt Regression-Tests durch
+8. Architecture Agent bestätigt Fix-Integration
+9. PO Agent kommuniziert Lösung an User
+
+## Quality Gates
+
+### Code Quality Standards
+- **TypeScript Coverage**: 100% Type Coverage
+- **Test Coverage**: > 80% Line Coverage
+- **Linting**: Zero ESLint Warnings
+- **Performance**: Lighthouse Score > 90
+- **Security**: No Critical Vulnerabilities
+
+### Deployment Criteria
+- **Build Success**: Green CI/CD Pipeline
+- **Test Passing**: All Tests Green
+- **Performance Budget**: Within Defined Limits
+- **Security Scan**: Clean Security Report
+
 ## 📚 Dokumentation
 
 - [📋 Product Requirements Document](./OK9-SaaS-Starter-Kit-PRD.md) - Detaillierte Projektspezifikation
-- [🤖 Claude Code Configuration](./CLAUDE.md) - Subagenten-Konfiguration
 - [🧪 Testing Setup](./TESTING.md) - Test-Strategie und -Konfiguration
 - [🧩 Frontend Components](./src/components/README.md) - UI-Komponenten Dokumentation
+- [/agents/](./agents/) - Subagenten-Anweisungen
 
 ## 🛠️ Verfügbare Scripts
 

@@ -877,6 +877,9 @@ function HomeContent() {
           <a href="https://github.com/bytefer/awesome-shadcn-ui" target="_blank" rel="noopener noreferrer">Awesome Shadcn</a>
         </Button>
         <Button asChild variant="outline" size="sm">
+          <a href="https://ui.aceternity.com/components" target="_blank" rel="noopener noreferrer">Aceternity</a>
+        </Button>
+        <Button asChild variant="outline" size="sm">
           <a href="https://ui.shadcn.com/docs/components" target="_blank" rel="noopener noreferrer">Shadcn</a>
         </Button>
         <Button asChild variant="outline" size="sm">

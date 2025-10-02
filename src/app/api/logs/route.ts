@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAuditLogs } from '@/lib/audit'
+import { getAuditLogs, AuditAction, AuditResource } from '@/lib/audit'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 
@@ -21,8 +21,10 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '50')
     const userId = searchParams.get('userId') || undefined
-    const action = searchParams.get('action') || undefined
-    const resource = searchParams.get('resource') || undefined
+    const actionParam = searchParams.get('action')
+    const action = actionParam && ['user_create', 'user_update', 'user_delete', 'user_login', 'user_logout', 'bulk_user_delete', 'bulk_user_activate', 'bulk_user_deactivate'].includes(actionParam) ? actionParam as AuditAction : undefined
+    const resourceParam = searchParams.get('resource')
+    const resource = resourceParam && ['users', 'subscriptions', 'invoices', 'api_keys', 'system'].includes(resourceParam) ? resourceParam as AuditResource : undefined
     const startDate = searchParams.get('startDate') ? new Date(searchParams.get('startDate')!) : undefined
     const endDate = searchParams.get('endDate') ? new Date(searchParams.get('endDate')!) : undefined
 

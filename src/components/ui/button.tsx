@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link" | "gradient" | "animated";
   size?: "default" | "sm" | "lg" | "icon";
+  asChild?: boolean;
   children: React.ReactNode;
 }
 
@@ -31,10 +32,27 @@ function Button({
   className,
   variant = "default",
   size = "default",
+  asChild = false,
   children,
   ...props
 }: ButtonProps) {
   const isAnimated = variant === "animated";
+
+  if (asChild) {
+    // For asChild, we need to clone the child element and apply our styles
+    const child = React.Children.only(children) as React.ReactElement;
+    const childProps = {
+      className: cn(
+        "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+        buttonVariants[variant],
+        sizeVariants[size],
+        className
+      ),
+      ...props
+    };
+
+    return React.cloneElement(child, childProps);
+  }
 
   if (isAnimated) {
     return (
@@ -47,7 +65,19 @@ function Button({
         )}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        {...props}
+        onClick={props.onClick}
+        disabled={props.disabled}
+        type={props.type}
+        form={props.form}
+        formAction={props.formAction}
+        formEncType={props.formEncType}
+        formMethod={props.formMethod}
+        formNoValidate={props.formNoValidate}
+        formTarget={props.formTarget}
+        name={props.name}
+        value={props.value}
+        autoFocus={props.autoFocus}
+        tabIndex={props.tabIndex}
       >
         {children}
       </motion.button>
@@ -64,7 +94,19 @@ function Button({
       )}
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
-      {...props}
+      onClick={props.onClick}
+      disabled={props.disabled}
+      type={props.type}
+      form={props.form}
+      formAction={props.formAction}
+      formEncType={props.formEncType}
+      formMethod={props.formMethod}
+      formNoValidate={props.formNoValidate}
+      formTarget={props.formTarget}
+      name={props.name}
+      value={props.value}
+      autoFocus={props.autoFocus}
+      tabIndex={props.tabIndex}
     >
       {children}
     </motion.button>

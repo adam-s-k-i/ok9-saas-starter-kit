@@ -14,6 +14,7 @@ interface DialogProps {
 interface DialogTriggerProps {
   children: React.ReactNode;
   onClick?: () => void;
+  asChild?: boolean;
 }
 
 interface DialogContentProps {
@@ -43,7 +44,14 @@ function Dialog({ open, onOpenChange, children }: DialogProps) {
   );
 }
 
-function DialogTrigger({ children, onClick }: DialogTriggerProps) {
+function DialogTrigger({ children, onClick, asChild = false }: DialogTriggerProps) {
+  if (asChild) {
+    const child = React.Children.only(children) as React.ReactElement<any>;
+    return React.cloneElement(child, {
+      onClick,
+    });
+  }
+
   return (
     <button
       onClick={onClick}

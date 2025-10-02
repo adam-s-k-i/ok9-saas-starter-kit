@@ -17,9 +17,10 @@ interface NavigationMenuProps {
   }>;
   className?: string;
   variant?: "default" | "floating";
+  children?: React.ReactNode;
 }
 
-function NavigationMenu({ items = [], className, variant = "default" }: NavigationMenuProps) {
+function NavigationMenu({ items = [], className, variant = "default", children }: NavigationMenuProps) {
   const [activeItem, setActiveItem] = useState<string | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -95,6 +96,14 @@ function NavigationMenu({ items = [], className, variant = "default" }: Navigati
     );
   }
 
+  if (children) {
+    return (
+      <nav className={cn("flex items-center space-x-6", className)}>
+        {children}
+      </nav>
+    );
+  }
+
   return (
     <nav className={cn("flex items-center space-x-6", className)}>
       {items.map((item, index) => (
@@ -164,9 +173,19 @@ const NavigationMenuContent = ({ children, className }: { children: React.ReactN
   </div>
 );
 
-const NavigationMenuLink = ({ children, className, href }: { children: React.ReactNode; className?: string; href?: string }) => (
-  <a href={href} className={cn("block", className)}>{children}</a>
-);
+const NavigationMenuLink = ({ children, className, href, asChild = false }: { children: React.ReactNode; className?: string; href?: string; asChild?: boolean }) => {
+  if (asChild) {
+    const child = React.Children.only(children) as React.ReactElement;
+    return React.cloneElement(child, {
+      className: cn("block", className, child.props.className),
+      ...child.props,
+    });
+  }
+
+  return (
+    <a href={href} className={cn("block", className)}>{children}</a>
+  );
+};
 
 export {
   NavigationMenu,

@@ -8,7 +8,7 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
 }
 
-function Card({ className, variant = "default", children, ...props }: CardProps) {
+function Card({ className, variant = "default", children }: CardProps) {
   const baseClasses = "bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm relative overflow-hidden";
 
   if (variant === "spotlight") {
@@ -18,7 +18,6 @@ function Card({ className, variant = "default", children, ...props }: CardProps)
         className={cn(baseClasses, "group", className)}
         whileHover={{ scale: 1.02 }}
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
-        {...props}
       >
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
         {children}
@@ -38,7 +37,6 @@ function Card({ className, variant = "default", children, ...props }: CardProps)
           boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
         }}
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
-        {...props}
       >
         {children}
       </motion.div>
@@ -52,7 +50,6 @@ function Card({ className, variant = "default", children, ...props }: CardProps)
         className={cn(baseClasses, "bg-gradient-to-br from-purple-500/10 via-blue-500/10 to-pink-500/10 border-purple-500/20", className)}
         whileHover={{ scale: 1.02 }}
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
-        {...props}
       >
         {children}
       </motion.div>
@@ -65,7 +62,6 @@ function Card({ className, variant = "default", children, ...props }: CardProps)
       className={cn(baseClasses, className)}
       whileHover={{ scale: 1.01 }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      {...props}
     >
       {children}
     </motion.div>

@@ -9,54 +9,8 @@ import { Badge } from '@/components/ui/badge'
 import { Calendar, Download, TrendingUp, Users, DollarSign, Activity, BarChart3, PieChart, LineChart } from 'lucide-react'
 import { DashboardCharts } from '@/components/dashboard/dashboard-charts'
 import { AdvancedRevenueAnalytics } from '@/components/dashboard/advanced-revenue-analytics'
-import { getDashboardOverview } from '@/lib/dashboard'
+import { getDashboardOverview, DashboardOverview } from '@/lib/dashboard'
 import { useEffect, useState } from 'react'
-
-interface DashboardOverview {
-  stats: {
-    totalUsers: number
-    newUsersThisMonth: number
-    newUsersPreviousMonth: number
-    monthlyGrowthPercent: number
-    monthlyRecurringRevenue: number
-    previousMonthlyRecurringRevenue: number
-    activeSubscriptions: number
-    trialingSubscriptions: number
-    canceledSubscriptionsThisMonth: number
-    paidInvoicesThisMonth: number
-  }
-  recentActivity: Array<{
-    id: string
-    title: string
-    description: string
-    timestamp: string
-  }>
-  recentInvoices: Array<{
-    id: string
-    user: { name: string | null; email: string }
-    amount: number
-    status: string
-    createdAt: string
-  }>
-  recentUsers: Array<{
-    id: string
-    name: string | null
-    email: string
-    createdAt: string
-  }>
-  revenueTrend: Array<{
-    month: string
-    revenue: number
-  }>
-  apiKeys: Array<{
-    id: string
-    name: string
-    user: { name: string | null; email: string }
-    createdAt: string
-    lastUsed: string | null
-    expiresAt: string | null
-  }>
-}
 
 export const dynamic = 'force-dynamic'
 
@@ -99,18 +53,21 @@ export default function AnalyticsPage() {
           recentActivity: [
             {
               id: '1',
+              type: 'user' as const,
               title: 'Max Mustermann',
               description: 'Neuer Benutzer registriert',
               timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
             },
             {
               id: '2',
+              type: 'subscription' as const,
               title: 'Anna Schmidt',
               description: 'Abonnement aktiviert',
               timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
             },
             {
               id: '3',
+              type: 'invoice' as const,
               title: 'Thomas Weber',
               description: 'Rechnung über €49.99 bezahlt',
               timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
@@ -121,15 +78,19 @@ export default function AnalyticsPage() {
               id: 'inv-1',
               user: { id: '1', name: 'Max Mustermann', email: 'max@example.com' },
               amount: 4999,
+              currency: 'eur',
               status: 'paid',
               createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+              paidAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
             },
             {
               id: 'inv-2',
               user: { id: '2', name: 'Anna Schmidt', email: 'anna@example.com' },
               amount: 2999,
+              currency: 'eur',
               status: 'paid',
               createdAt: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
+              paidAt: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
             },
           ],
           recentUsers: [

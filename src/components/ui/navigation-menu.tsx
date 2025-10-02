@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 interface NavigationMenuProps {
-  items: Array<{
+  items?: Array<{
     label: string;
     href?: string;
     onClick?: () => void;
@@ -19,7 +19,7 @@ interface NavigationMenuProps {
   variant?: "default" | "floating";
 }
 
-function NavigationMenu({ items, className, variant = "default" }: NavigationMenuProps) {
+function NavigationMenu({ items = [], className, variant = "default" }: NavigationMenuProps) {
   const [activeItem, setActiveItem] = useState<string | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
 
